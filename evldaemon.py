@@ -20,15 +20,17 @@ class Connection:
         self._conn = None
 
     def start(self):
-        self._group.spawn(self.connect)
-        self._group.spawn(self._process_loop)
-        self._group.spawn(self._send_loop)
+        self._connect()
+        self._group.spawn(self._receive)
+        self._group.spawn(self._process)
+        self._group.spawn(self._send)
         self._group.join()
 
-    def connect(self):
+    def _connect(self):
         print("Connecting to EVL...")
         self._conn = socket.create_connection((self.host, self.port))
 
+    def _receive(self):
         while True:
             data = self._conn.recv(512)
 
@@ -44,14 +46,12 @@ class Connection:
         print("Disconnected!")
         self.stop()
 
-    def _send_loop(self):
+    def _send(self):
         while True:
             command = self._send_queue.get()
             self._conn.sendall(command.encode())
 
-    def _process_loop(self):
-        print("Listening for events..")
-        
+    def _process(self):
         while True:
             event = self._recv_queue.get()
 
