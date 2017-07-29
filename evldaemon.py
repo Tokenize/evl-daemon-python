@@ -8,7 +8,7 @@ import tpi
 
 class Connection:
 
-    def __init__(self, host, port=4025, password=""):
+    def __init__(self, host: str, port: int=4025, password: str=""):
         self.host = host
         self.port = port
         self.password = password
@@ -69,7 +69,7 @@ class Connection:
 
         self._group.kill()
 
-    def send(self, command, data=""):
+    def send(self, command: str, data: str=""):
         checksum = tpi.calculate_checksum(command + data)
         packet = command + data + checksum + "\r\n"
         self._send_queue.put(packet)
