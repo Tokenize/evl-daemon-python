@@ -1,5 +1,6 @@
 import unittest
-import tpi
+
+from evl import tpi
 
 
 class TestTpi(unittest.TestCase):
