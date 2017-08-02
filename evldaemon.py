@@ -1,4 +1,6 @@
 import sys
+import socket
+
 from evl.connection import Connection
 from evl.notifiers.consolenotifier import ConsoleNotifier
 
@@ -12,7 +14,9 @@ if __name__ == '__main__':
     host = sys.argv[1]
     password = sys.argv[2]
 
-    connection = Connection(host=host, password=password)
+    resolved = socket.gethostbyname(host)
+
+    connection = Connection(host=resolved, password=password)
     connection.event_manager.add_notifier(ConsoleNotifier("[{timestamp}] Event: {event}"))
 
     connection.start()
