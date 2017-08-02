@@ -1,5 +1,6 @@
 import sys
 from evl.connection import Connection
+from evl.notifiers.consolenotifier import ConsoleNotifier
 
 if __name__ == '__main__':
     print("Welcome to EvlDaemon")
@@ -12,4 +13,6 @@ if __name__ == '__main__':
     password = sys.argv[2]
 
     connection = Connection(host=host, password=password)
+    connection.event_manager.add_notifier(ConsoleNotifier("Event!! {event}"))
+
     connection.start()

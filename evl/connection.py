@@ -3,6 +3,7 @@ import gevent.queue
 from gevent import socket
 
 from evl import tpi
+from evl.eventmanager import EventManager
 
 
 class Connection:
@@ -11,6 +12,9 @@ class Connection:
         self.host = host
         self.port = port
         self.password = password
+
+        self._event_queue = gevent.queue.Queue()
+        self.event_manager = EventManager(self._event_queue)
 
         self._recv_queue = gevent.queue.Queue()
         self._send_queue = gevent.queue.Queue()
@@ -23,6 +27,7 @@ class Connection:
         self._group.spawn(self._receive)
         self._group.spawn(self._send)
         self._group.spawn(self._process)
+        self._group.spawn(self.event_manager.wait)
         self._group.join()
 
     def _connect(self):
@@ -69,7 +74,7 @@ class Connection:
             elif tpi.command(event) == "500":
                 self._ack_queue.put(event)
             else:
-                print("Event: {0}".format(event))
+                self._event_queue.put(event)
 
     def stop(self):
         print("Killing processes..")
