@@ -58,9 +58,7 @@ class Connection:
 
             try:
                 ack = self._ack_queue.get(timeout=2)
-                if tpi.data(ack) == tpi.command(packet):
-                    print("Command acknowledged!")
-                else:
+                if tpi.data(ack) != tpi.command(packet):
                     print("Incorrect acknowledgement!")
             except gevent.queue.Empty:
                 print("Timeout waiting for acknowledgement!")
@@ -69,10 +67,12 @@ class Connection:
         while True:
             event = self._recv_queue.get()
 
-            if tpi.command(event) == Command.LOGIN and tpi.data(event) == LoginType.PASSWORD_REQUEST:
+            command = Command(tpi.command(event))
+            data = tpi.data(event)
+            if command == Command.LOGIN and LoginType(data) == LoginType.PASSWORD_REQUEST:
                 print("Logging in...")
-                self.send(Command.LOGIN, self.password)
-            elif tpi.command(event) == Command.COMMAND_ACKNOWLEDGE:
+                self.send(Command.NETWORK_LOGIN, self.password)
+            elif command == Command.COMMAND_ACKNOWLEDGE:
                 self._ack_queue.put(event)
             else:
                 self._event_queue.put(event)
@@ -86,6 +86,7 @@ class Connection:
         self._group.kill()
 
     def send(self, command: Command, data: str=""):
-        checksum = tpi.calculate_checksum(command + data)
-        packet = command + data + checksum + "\r\n"
+        command_str = command.value
+        checksum = tpi.calculate_checksum(command_str + data)
+        packet = "{command}{data}{checksum}\r\n".format(command=command_str, data=data, checksum=checksum)
         self._send_queue.put(packet)
