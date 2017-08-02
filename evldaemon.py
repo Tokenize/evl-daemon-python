@@ -13,6 +13,6 @@ if __name__ == '__main__':
     password = sys.argv[2]
 
     connection = Connection(host=host, password=password)
-    connection.event_manager.add_notifier(ConsoleNotifier("Event!! {event}"))
+    connection.event_manager.add_notifier(ConsoleNotifier("[{timestamp}] Event: {event}"))
 
     connection.start()
