@@ -3,7 +3,8 @@ import gevent.queue
 from gevent import socket
 
 from evl import tpi
-from evl.eventmanager import EventManager
+from evl.command import Command, LoginType
+from evl.event import EventManager
 
 
 class Connection:
@@ -68,10 +69,10 @@ class Connection:
         while True:
             event = self._recv_queue.get()
 
-            if tpi.command(event) == "505" and tpi.data(event) == "3":
+            if tpi.command(event) == Command.LOGIN and tpi.data(event) == LoginType.PASSWORD_REQUEST:
                 print("Logging in...")
-                self.send("005", self.password)
-            elif tpi.command(event) == "500":
+                self.send(Command.LOGIN, self.password)
+            elif tpi.command(event) == Command.COMMAND_ACKNOWLEDGE:
                 self._ack_queue.put(event)
             else:
                 self._event_queue.put(event)
@@ -84,7 +85,7 @@ class Connection:
 
         self._group.kill()
 
-    def send(self, command: str, data: str=""):
+    def send(self, command: Command, data: str=""):
         checksum = tpi.calculate_checksum(command + data)
         packet = command + data + checksum + "\r\n"
         self._send_queue.put(packet)
