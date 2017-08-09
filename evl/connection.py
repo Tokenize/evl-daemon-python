@@ -75,7 +75,7 @@ class Connection:
             elif command == Command.COMMAND_ACKNOWLEDGE:
                 self._ack_queue.put(event)
             else:
-                self._event_queue.put(event)
+                self._event_queue.put((command, data))
 
     def stop(self):
         print("Killing processes..")
