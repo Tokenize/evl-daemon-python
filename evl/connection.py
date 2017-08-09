@@ -2,9 +2,9 @@ import gevent.pool
 import gevent.queue
 from gevent import socket
 
-from evl import tpi
-from evl.command import Command, LoginType
-from evl.event import EventManager
+from . import tpi
+from .command import Command, LoginType
+from .event import EventManager
 
 
 class Connection:
@@ -42,6 +42,7 @@ class Connection:
             if not data:
                 break
 
+            # TODO: Check for incomplete commands (ie. no CRLF)
             data_str = data.decode("ascii").strip()
             events = data_str.split("\r\n")
 
