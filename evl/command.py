@@ -1,6 +1,13 @@
 from enum import Enum
 
 
+class Priority(Enum):
+    Low = 0
+    Medium = 1
+    High = 2
+    Critical = 3
+
+
 class Command(Enum):
     POLL = "000"
     STATUS_REPORT = "001"
@@ -29,3 +36,21 @@ class LoginType(Enum):
     LOGIN_SUCCESSFUL = "1"
     TIME_OUT = "2"
     PASSWORD_REQUEST = "3"
+
+
+class PartitionArmedType(Enum):
+    AWAY = "0"
+    STAY = "1"
+    ZERO_ENTRY_AWAY = "2"
+    ZERO_ENTRY_STAY = "3"
+
+
+class LedState(Enum):
+    READY = "0"
+    ARMED = "1"
+    MEMORY = "2"
+    BYPASS = "3"
+    TROUBLE = "4"
+    PROGRAM = "5"
+    FIRE = "6"
+    BACKLIGHT = "7"
