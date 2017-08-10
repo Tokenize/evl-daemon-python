@@ -8,7 +8,10 @@ from .event import EventManager
 
 
 class Connection:
-
+    """
+    Represents a connection to an EVL device. Responsible for connecting to the EVL,
+    sending and receiving data, and processing incoming commands as appropriate.
+    """
     def __init__(self, host: str, port: int=4025, password: str=""):
         self.host = host
         self.port = port
@@ -24,6 +27,10 @@ class Connection:
         self._conn = None
 
     def start(self):
+        """
+        Begins processing by connecting to the EVL device and initiating
+        the various data handling routines.
+        """
         self._connect()
         self._group.spawn(self._receive)
         self._group.spawn(self._send)
@@ -32,10 +39,15 @@ class Connection:
         self._group.join()
 
     def _connect(self):
+        """Initiates connection to the EVL device."""
         print("Connecting to EVL...")
         self._conn = socket.create_connection((self.host, self.port))
 
     def _receive(self):
+        """
+        Receive loop that accepts incoming data from the EVL device,
+        decodes it and adds it to the receive queue for processing.
+        """
         while True:
             data = self._conn.recv(512)
 
@@ -53,6 +65,10 @@ class Connection:
         self.stop()
 
     def _send(self):
+        """
+        Send loop that sends outgoing commands to the EVL device and waits
+        for the corresponding acknowledgement to be received.
+        """
         while True:
             packet = self._send_queue.get()
             self._conn.sendall(packet.encode())
@@ -65,6 +81,7 @@ class Connection:
                 print("Timeout waiting for acknowledgement!")
 
     def _process(self):
+        """Processing loop that receives incoming commands and processes as necessary."""
         while True:
             event = self._recv_queue.get()
 
@@ -79,6 +96,7 @@ class Connection:
                 self._event_queue.put((command, data))
 
     def stop(self):
+        """Cleanly stop all processing and disconnect from the EVL device."""
         print("Killing processes..")
 
         if self._conn is not None:
@@ -87,6 +105,11 @@ class Connection:
         self._group.kill()
 
     def send(self, command: Command, data: str=""):
+        """
+        Send the given command and data to the EVL device.
+        :param command: Command to send
+        :param data: Data to send, if applicable
+        """
         command_str = command.value
         checksum = tpi.calculate_checksum(command_str + data)
         packet = "{command}{data}{checksum}\r\n".format(command=command_str, data=data, checksum=checksum)

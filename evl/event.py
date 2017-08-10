@@ -1,5 +1,4 @@
 from datetime import datetime
-from enum import Enum
 
 from .command import Command, LoginType, Priority
 
@@ -36,7 +35,11 @@ LOGIN_TYPE_NAMES = {
 
 
 class Event:
-    def __init__(self, command, data="", priority=Priority.Low, timestamp=None):
+    """
+    Represents an event from the EVL module, including the command, data,
+    priority, timestamp and string description of the event.
+    """
+    def __init__(self, command: Command, data: str="", priority: Priority=Priority.Low, timestamp=None):
         self.command = command
         self.data = data
         self.priority = priority
@@ -51,9 +54,12 @@ class Event:
 
 
 class EventManager:
-
-    def __init__(self, event_queue, notifiers=None, command_names=None,
-                 login_names=None):
+    """
+    Represents an event manager that waits for incoming events from an event queue
+    and dispatches events to its list of event notifiers.
+    """
+    def __init__(self, event_queue, notifiers: list=None, command_names: dict=None,
+                 login_names: dict=None):
         if notifiers is None:
             notifiers = []
         self._notifiers = notifiers
@@ -62,9 +68,18 @@ class EventManager:
         self._login_names = EventManager.merge_names(LOGIN_TYPE_NAMES, overrides=login_names)
 
     def add_notifier(self, notifier):
+        """
+        Adds a notifier object to the list of notifiers.
+        :param notifier: Notifier to add to notifier list
+        """
         self._notifiers.append(notifier)
 
     def _describe(self, event: Event):
+        """
+        Describes the given event based on the event's command and data.
+        :param event: Event to describe
+        :return: Description of event
+        """
         cmd_desc = self._describe_command(event.command)
         if event.command == Command.LOGIN:
             login_type = LoginType(event.data)
@@ -74,12 +89,18 @@ class EventManager:
         return description
 
     def _describe_command(self, command: Command):
+        """
+        Describes the given command.
+        :param command: Command to describe
+        :return: Description of command
+        """
         name = self._command_names.get(command)
         if name is None:
             name = "<Unknown: [{command}]>".format(command=command.value)
         return name
 
     def wait(self):
+        """Initiate wait for incoming events in event queue."""
         while True:
             (command, data) = self._event_queue.get()
             event = Event(command, data, timestamp=datetime.now())
@@ -88,7 +109,13 @@ class EventManager:
                 notifier.notify(event)
 
     @staticmethod
-    def merge_names(default, overrides=None):
+    def merge_names(default: dict, overrides: dict=None):
+        """
+        Merge given default dictionary of names with given overrides.
+        :param default: Default dictionary of names
+        :param overrides: Dictionary of name overrides
+        :return: Merged names dictionary
+        """
         if overrides:
             return {**default, **overrides}
         return default
