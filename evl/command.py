@@ -2,10 +2,10 @@ from enum import Enum
 
 
 class Priority(Enum):
-    Low = 0
-    Medium = 1
-    High = 2
-    Critical = 3
+    LOW = 0
+    MEDIUM = 1
+    HIGH = 2
+    CRITICAL = 3
 
 
 class Command(Enum):
