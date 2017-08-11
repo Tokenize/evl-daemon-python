@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from .command import Command, LoginType, Priority
+from .command import Command, LedState, LoginType, Priority, PartitionArmedType
 
 
 COMMAND_NAMES = {
@@ -23,7 +23,41 @@ COMMAND_NAMES = {
     Command.PARTITION_IS_BUSY: "Partition is Busy",
     Command.SPECIAL_CLOSING: "Special Closing",
     Command.USER_OPENING: "User Opening",
-    Command.TROUBLE_LED_OFF: "Trouble LED Off",
+    Command.TROUBLE_LED_OFF: "Trouble LED Off"
+}
+
+COMMAND_PRIORITIES = {
+    Command.POLL: Priority.LOW,
+    Command.STATUS_REPORT: Priority.LOW,
+    Command.NETWORK_LOGIN: Priority.LOW,
+    Command.COMMAND_ACKNOWLEDGE: Priority.LOW,
+    Command.LOGIN: Priority.LOW,
+    Command.KEYPAD_LED_FLASH_STATE: Priority.LOW,
+    Command.KEYPAD_LED_STATE: Priority.LOW,
+    Command.ZONE_OPEN: Priority.LOW,
+    Command.ZONE_RESTORED: Priority.MEDIUM,
+    Command.PARTITION_READY: Priority.LOW,
+    Command.PARTITION_NOT_READY: Priority.LOW,
+    Command.PARTITION_ARMED: Priority.MEDIUM,
+    Command.PARTITION_IN_ALARM: Priority.CRITICAL,
+    Command.PARTITION_DISARMED: Priority.MEDIUM,
+    Command.EXIT_DELAY_IN_PROGRESS: Priority.MEDIUM,
+    Command.ENTRY_DELAY_IN_PROGRESS: Priority.MEDIUM,
+    Command.PARTITION_IS_BUSY: Priority.LOW,
+    Command.SPECIAL_CLOSING: Priority.LOW,
+    Command.USER_OPENING: Priority.LOW,
+    Command.TROUBLE_LED_OFF: Priority.LOW
+}
+
+LED_STATE_NAMES = {
+    LedState.ARMED: "Armed",
+    LedState.BACKLIGHT: "Backlight",
+    LedState.BYPASS: "Bypass",
+    LedState.FIRE: "Fire",
+    LedState.MEMORY: "Memory",
+    LedState.PROGRAM: "Program",
+    LedState.READY: "Ready",
+    LedState.TROUBLE: "Trouble"
 }
 
 LOGIN_TYPE_NAMES = {
@@ -33,13 +67,20 @@ LOGIN_TYPE_NAMES = {
     LoginType.TIME_OUT: "Login Timeout"
 }
 
+PARTITION_ARMED_NAMES = {
+    PartitionArmedType.AWAY: "Away",
+    PartitionArmedType.STAY: "Stay",
+    PartitionArmedType.ZERO_ENTRY_AWAY: "Zero Entry Away",
+    PartitionArmedType.ZERO_ENTRY_STAY: "Zero Entry Stay"
+}
+
 
 class Event:
     """
     Represents an event from the EVL module, including the command, data,
     priority, timestamp and string description of the event.
     """
-    def __init__(self, command: Command, data: str="", priority: Priority=Priority.Low, timestamp=None):
+    def __init__(self, command: Command, data: str="", priority: Priority=Priority.LOW, timestamp=None):
         self.command = command
         self.data = data
         self.priority = priority
