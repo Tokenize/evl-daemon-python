@@ -48,15 +48,23 @@ class Connection:
         Receive loop that accepts incoming data from the EVL device,
         decodes it and adds it to the receive queue for processing.
         """
+        incomplete = ""
         while True:
             data = self._conn.recv(512)
 
             if not data:
                 break
 
-            # TODO: Check for incomplete commands (ie. no CRLF)
-            data_str = data.decode("ascii").strip()
-            events = data_str.split("\r\n")
+            decoded = incomplete + data.decode("ascii")
+            if decoded.endswith("\r\n"):
+                # Complete command(s) received
+                events = decoded.strip().split("\r\n")
+                incomplete = ""
+            else:
+                # Incomplete command received
+                split = decoded.split("\r\n")
+                events = split[:-1]
+                incomplete = split[-1]
 
             for e in events:
                 self._recv_queue.put(e)
