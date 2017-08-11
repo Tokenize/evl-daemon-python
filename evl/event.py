@@ -100,13 +100,14 @@ class EventManager:
     and dispatches events to its list of event notifiers.
     """
     def __init__(self, event_queue, notifiers: list=None, command_names: dict=None,
-                 login_names: dict=None):
+                 priorities: dict=None, login_names: dict=None):
         if notifiers is None:
             notifiers = []
         self._notifiers = notifiers
         self._event_queue = event_queue
-        self._command_names = EventManager.merge_names(COMMAND_NAMES, overrides=command_names)
-        self._login_names = EventManager.merge_names(LOGIN_TYPE_NAMES, overrides=login_names)
+        self._command_names = EventManager.merge_dicts(COMMAND_NAMES, overrides=command_names)
+        self._priorities = EventManager.merge_dicts(COMMAND_PRIORITIES, overrides=priorities)
+        self._login_names = EventManager.merge_dicts(LOGIN_TYPE_NAMES, overrides=login_names)
 
     def add_notifier(self, notifier):
         """
@@ -144,18 +145,19 @@ class EventManager:
         """Initiate wait for incoming events in event queue."""
         while True:
             (command, data) = self._event_queue.get()
-            event = Event(command, data, timestamp=datetime.now())
+            priority = self._priorities[command]
+            event = Event(command, data, timestamp=datetime.now(), priority=priority)
             event.description = self._describe(event)
             for notifier in self._notifiers:
                 notifier.notify(event)
 
     @staticmethod
-    def merge_names(default: dict, overrides: dict=None):
+    def merge_dicts(default: dict, overrides: dict=None):
         """
-        Merge given default dictionary of names with given overrides.
-        :param default: Default dictionary of names
-        :param overrides: Dictionary of name overrides
-        :return: Merged names dictionary
+        Merge given default dictionary of values with given overrides.
+        :param default: Default dictionary of values
+        :param overrides: Dictionary of value overrides
+        :return: Merged dictionary
         """
         if overrides:
             return {**default, **overrides}
