@@ -1,6 +1,7 @@
 import sys
 import socket
 
+from evl.command import Priority
 from evl.connection import Connection
 from evl.notifiers.consolenotifier import ConsoleNotifier
 
@@ -17,6 +18,7 @@ if __name__ == '__main__':
     resolved = socket.gethostbyname(host)
 
     connection = Connection(host=resolved, password=password)
-    connection.event_manager.add_notifier(ConsoleNotifier("[{timestamp}] Event: {event}"))
+    console = ConsoleNotifier(priority=Priority.LOW)
+    connection.event_manager.add_notifier(console)
 
     connection.start()

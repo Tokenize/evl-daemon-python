@@ -1,16 +1,21 @@
 from datetime import datetime
 
 
+from evl.command import Priority
 from evl.event import Event
 
 
 class ConsoleNotifier:
-    def __init__(self, format_str: str=None):
-        self.format_str = format_str
-        if format_str is None:
-            self.format_str = "[{timestamp}] {event}"
+    def __init__(self, priority: Priority=Priority.LOW, layout: str=None):
+        self.priority = priority
+        self.layout = layout
+        if layout is None:
+            self.layout = "[{timestamp}] [{priority}] {event}"
 
     def notify(self, event: Event, timestamp=None):
         if timestamp is None:
             timestamp = datetime.now()
-        print(self.format_str.format(timestamp=timestamp, event=event))
+
+        if event.priority.value >= self.priority.value:
+            print(self.layout.format(timestamp=timestamp, event=event,
+                                     priority=event.priority))
