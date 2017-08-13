@@ -50,7 +50,10 @@ class Connection:
         """
         incomplete = ""
         while True:
-            data = self._conn.recv(512)
+            try:
+                data = self._conn.recv(512)
+            except IOError:
+                data = None
 
             if not data:
                 break
@@ -105,8 +108,6 @@ class Connection:
 
     def stop(self):
         """Cleanly stop all processing and disconnect from the EVL device."""
-        print("Killing processes..")
-
         if self._conn is not None:
             self._conn.close()
 

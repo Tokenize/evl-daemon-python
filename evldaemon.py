@@ -1,5 +1,7 @@
 import sys
 import socket
+import signal
+import gevent.signal
 
 from evl.command import Priority
 from evl.connection import Connection
@@ -20,5 +22,7 @@ if __name__ == '__main__':
     connection = Connection(host=resolved, password=password)
     console = ConsoleNotifier(priority=Priority.LOW)
     connection.event_manager.add_notifier(console)
+
+    gevent.signal(signal.SIGINT, connection.stop)
 
     connection.start()
