@@ -1,52 +1,52 @@
 from datetime import datetime
 
-from .command import Command, LedState, LoginType, Priority, PartitionArmedType
+from .command import CommandType, LedState, LoginType, Priority, PartitionArmedType
 
 
 COMMAND_NAMES = {
-    Command.POLL: "Poll",
-    Command.STATUS_REPORT: "Status Report",
-    Command.NETWORK_LOGIN: "Network Login",
-    Command.COMMAND_ACKNOWLEDGE: "Command Acknowledge",
-    Command.LOGIN: "Login",
-    Command.KEYPAD_LED_FLASH_STATE: "Keypad LED Flash State",
-    Command.KEYPAD_LED_STATE: "Keypad LED State",
-    Command.ZONE_OPEN: "Zone Open",
-    Command.ZONE_RESTORED: "Zone Restored",
-    Command.PARTITION_READY: "Partition Ready",
-    Command.PARTITION_NOT_READY: "Partition Not Ready",
-    Command.PARTITION_ARMED: "Partition Armed",
-    Command.PARTITION_IN_ALARM: "Partition In Alarm",
-    Command.PARTITION_DISARMED: "Partition Disarmed",
-    Command.EXIT_DELAY_IN_PROGRESS: "Exit Delay in Progress",
-    Command.ENTRY_DELAY_IN_PROGRESS: "Entry Delay in Progress",
-    Command.PARTITION_IS_BUSY: "Partition is Busy",
-    Command.SPECIAL_CLOSING: "Special Closing",
-    Command.USER_OPENING: "User Opening",
-    Command.TROUBLE_LED_OFF: "Trouble LED Off"
+    CommandType.POLL: "Poll",
+    CommandType.STATUS_REPORT: "Status Report",
+    CommandType.NETWORK_LOGIN: "Network Login",
+    CommandType.COMMAND_ACKNOWLEDGE: "Command Acknowledge",
+    CommandType.LOGIN: "Login",
+    CommandType.KEYPAD_LED_FLASH_STATE: "Keypad LED Flash State",
+    CommandType.KEYPAD_LED_STATE: "Keypad LED State",
+    CommandType.ZONE_OPEN: "Zone Open",
+    CommandType.ZONE_RESTORED: "Zone Restored",
+    CommandType.PARTITION_READY: "Partition Ready",
+    CommandType.PARTITION_NOT_READY: "Partition Not Ready",
+    CommandType.PARTITION_ARMED: "Partition Armed",
+    CommandType.PARTITION_IN_ALARM: "Partition In Alarm",
+    CommandType.PARTITION_DISARMED: "Partition Disarmed",
+    CommandType.EXIT_DELAY_IN_PROGRESS: "Exit Delay in Progress",
+    CommandType.ENTRY_DELAY_IN_PROGRESS: "Entry Delay in Progress",
+    CommandType.PARTITION_IS_BUSY: "Partition is Busy",
+    CommandType.SPECIAL_CLOSING: "Special Closing",
+    CommandType.USER_OPENING: "User Opening",
+    CommandType.TROUBLE_LED_OFF: "Trouble LED Off"
 }
 
 COMMAND_PRIORITIES = {
-    Command.POLL: Priority.LOW,
-    Command.STATUS_REPORT: Priority.LOW,
-    Command.NETWORK_LOGIN: Priority.LOW,
-    Command.COMMAND_ACKNOWLEDGE: Priority.LOW,
-    Command.LOGIN: Priority.LOW,
-    Command.KEYPAD_LED_FLASH_STATE: Priority.LOW,
-    Command.KEYPAD_LED_STATE: Priority.LOW,
-    Command.ZONE_OPEN: Priority.LOW,
-    Command.ZONE_RESTORED: Priority.MEDIUM,
-    Command.PARTITION_READY: Priority.LOW,
-    Command.PARTITION_NOT_READY: Priority.LOW,
-    Command.PARTITION_ARMED: Priority.MEDIUM,
-    Command.PARTITION_IN_ALARM: Priority.CRITICAL,
-    Command.PARTITION_DISARMED: Priority.MEDIUM,
-    Command.EXIT_DELAY_IN_PROGRESS: Priority.MEDIUM,
-    Command.ENTRY_DELAY_IN_PROGRESS: Priority.MEDIUM,
-    Command.PARTITION_IS_BUSY: Priority.LOW,
-    Command.SPECIAL_CLOSING: Priority.LOW,
-    Command.USER_OPENING: Priority.LOW,
-    Command.TROUBLE_LED_OFF: Priority.LOW
+    CommandType.POLL: Priority.LOW,
+    CommandType.STATUS_REPORT: Priority.LOW,
+    CommandType.NETWORK_LOGIN: Priority.LOW,
+    CommandType.COMMAND_ACKNOWLEDGE: Priority.LOW,
+    CommandType.LOGIN: Priority.LOW,
+    CommandType.KEYPAD_LED_FLASH_STATE: Priority.LOW,
+    CommandType.KEYPAD_LED_STATE: Priority.LOW,
+    CommandType.ZONE_OPEN: Priority.LOW,
+    CommandType.ZONE_RESTORED: Priority.MEDIUM,
+    CommandType.PARTITION_READY: Priority.LOW,
+    CommandType.PARTITION_NOT_READY: Priority.LOW,
+    CommandType.PARTITION_ARMED: Priority.MEDIUM,
+    CommandType.PARTITION_IN_ALARM: Priority.CRITICAL,
+    CommandType.PARTITION_DISARMED: Priority.MEDIUM,
+    CommandType.EXIT_DELAY_IN_PROGRESS: Priority.MEDIUM,
+    CommandType.ENTRY_DELAY_IN_PROGRESS: Priority.MEDIUM,
+    CommandType.PARTITION_IS_BUSY: Priority.LOW,
+    CommandType.SPECIAL_CLOSING: Priority.LOW,
+    CommandType.USER_OPENING: Priority.LOW,
+    CommandType.TROUBLE_LED_OFF: Priority.LOW
 }
 
 LED_STATE_NAMES = {
@@ -80,7 +80,7 @@ class Event:
     Represents an event from the EVL module, including the command, data,
     priority, timestamp and string description of the event.
     """
-    def __init__(self, command: Command, data: str="", priority: Priority=Priority.LOW, timestamp=None):
+    def __init__(self, command: CommandType, data: str= "", priority: Priority=Priority.LOW, timestamp=None):
         self.command = command
         self.data = data
         self.priority = priority
@@ -123,14 +123,14 @@ class EventManager:
         :return: Description of event
         """
         cmd_desc = self._describe_command(event.command)
-        if event.command == Command.LOGIN:
+        if event.command == CommandType.LOGIN:
             login_type = LoginType(event.data)
             description = "{command}: {login}".format(command=cmd_desc, login=self._login_names[login_type])
         else:
             description = "{command}".format(command=cmd_desc)
         return description
 
-    def _describe_command(self, command: Command):
+    def _describe_command(self, command: CommandType):
         """
         Describes the given command.
         :param command: Command to describe

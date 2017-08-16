@@ -3,7 +3,7 @@ import gevent.queue
 from gevent import socket
 
 from . import tpi
-from .command import Command, LoginType
+from .command import CommandType, LoginType
 from .event import EventManager
 
 
@@ -96,12 +96,12 @@ class Connection:
         while True:
             event = self._recv_queue.get()
 
-            command = Command(tpi.command(event))
+            command = CommandType(tpi.command(event))
             data = tpi.data(event)
-            if command == Command.LOGIN and LoginType(data) == LoginType.PASSWORD_REQUEST:
+            if command == CommandType.LOGIN and LoginType(data) == LoginType.PASSWORD_REQUEST:
                 print("Logging in...")
-                self.send(Command.NETWORK_LOGIN, self.password)
-            elif command == Command.COMMAND_ACKNOWLEDGE:
+                self.send(CommandType.NETWORK_LOGIN, self.password)
+            elif command == CommandType.COMMAND_ACKNOWLEDGE:
                 self._ack_queue.put(event)
             else:
                 self._event_queue.put((command, data))
@@ -113,10 +113,10 @@ class Connection:
 
         self._group.kill()
 
-    def send(self, command: Command, data: str=""):
+    def send(self, command: CommandType, data: str= ""):
         """
         Send the given command and data to the EVL device.
-        :param command: Command to send
+        :param command: CommandType to send
         :param data: Data to send, if applicable
         """
         command_str = command.value

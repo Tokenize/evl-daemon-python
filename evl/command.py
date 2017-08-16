@@ -8,7 +8,7 @@ class Priority(Enum):
     CRITICAL = 3
 
 
-class Command(Enum):
+class CommandType(Enum):
     POLL = "000"
     STATUS_REPORT = "001"
     NETWORK_LOGIN = "005"

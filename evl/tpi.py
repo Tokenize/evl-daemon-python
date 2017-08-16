@@ -9,7 +9,7 @@ def calculate_checksum(cmd_data: str) -> str:
     Calculates the checksum for the given command and data and truncates the
     result to two bytes if necessary.
 
-    :param cmd_data: Command and data to calculate checksum
+    :param cmd_data: CommandType and data to calculate checksum
     :return: Calculated checksum
     """
     checksum = sum([ord(c) for c in cmd_data])
@@ -56,6 +56,6 @@ def command(packet: str) -> str:
     """Returns the command part of the given packet.
 
     :param packet: Data packet
-    :return: Command
+    :return: CommandType
     """
     return packet[:3]
