@@ -1,13 +1,6 @@
 from enum import Enum
 
 
-class Priority(Enum):
-    LOW = 0
-    MEDIUM = 1
-    HIGH = 2
-    CRITICAL = 3
-
-
 class CommandType(Enum):
     POLL = "000"
     STATUS_REPORT = "001"
@@ -31,6 +24,17 @@ class CommandType(Enum):
     TROUBLE_LED_OFF = "841"
 
 
+class LedState(Enum):
+    READY = "0"
+    ARMED = "1"
+    MEMORY = "2"
+    BYPASS = "3"
+    TROUBLE = "4"
+    PROGRAM = "5"
+    FIRE = "6"
+    BACKLIGHT = "7"
+
+
 class LoginType(Enum):
     INCORRECT_PASSWORD = "0"
     LOGIN_SUCCESSFUL = "1"
@@ -45,12 +49,26 @@ class PartitionArmedType(Enum):
     ZERO_ENTRY_STAY = "3"
 
 
-class LedState(Enum):
-    READY = "0"
-    ARMED = "1"
-    MEMORY = "2"
-    BYPASS = "3"
-    TROUBLE = "4"
-    PROGRAM = "5"
-    FIRE = "6"
-    BACKLIGHT = "7"
+class Priority(Enum):
+    LOW = 0
+    MEDIUM = 1
+    HIGH = 2
+    CRITICAL = 3
+
+    def __str__(self):
+        return self.name.title()
+
+
+class Command:
+    def __init__(self, number: str):
+        self.number = number
+
+        try:
+            self.command_type = CommandType(number)
+        except ValueError:
+            self.command_type = None
+
+    def __str__(self):
+        if self.command_type is None:
+            return "<Unknown: {type}>".format(type=self.number)
+        return self.command_type.name

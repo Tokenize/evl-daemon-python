@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from .command import CommandType, LedState, LoginType, Priority, PartitionArmedType
+from .command import Command, CommandType, LedState, LoginType,\
+    Priority, PartitionArmedType
 
 
 COMMAND_NAMES = {
@@ -80,11 +81,14 @@ class Event:
     Represents an event from the EVL module, including the command, data,
     priority, timestamp and string description of the event.
     """
-    def __init__(self, command: CommandType, data: str= "", priority: Priority=Priority.LOW, timestamp=None):
+    def __init__(self, command: Command, data: str= "", priority: Priority=Priority.LOW, timestamp=None):
         self.command = command
         self.data = data
-        self.priority = priority
         self.description = ""
+
+        if priority is None:
+            priority = Priority.LOW
+        self.priority = priority
 
         if timestamp is None:
             timestamp = datetime.now()
@@ -105,6 +109,7 @@ class EventManager:
             notifiers = []
         self._notifiers = notifiers
         self._event_queue = event_queue
+
         self._command_names = EventManager.merge_dicts(COMMAND_NAMES, overrides=command_names)
         self._priorities = EventManager.merge_dicts(COMMAND_PRIORITIES, overrides=priorities)
         self._login_names = EventManager.merge_dicts(LOGIN_TYPE_NAMES, overrides=login_names)
@@ -123,29 +128,29 @@ class EventManager:
         :return: Description of event
         """
         cmd_desc = self._describe_command(event.command)
-        if event.command == CommandType.LOGIN:
+        if event.command.command_type == CommandType.LOGIN:
             login_type = LoginType(event.data)
             description = "{command}: {login}".format(command=cmd_desc, login=self._login_names[login_type])
         else:
             description = "{command}".format(command=cmd_desc)
         return description
 
-    def _describe_command(self, command: CommandType):
+    def _describe_command(self, command: Command):
         """
         Describes the given command.
         :param command: Command to describe
         :return: Description of command
         """
-        name = self._command_names.get(command)
+        name = self._command_names.get(command.command_type)
         if name is None:
-            name = "<Unknown: [{command}]>".format(command=command.value)
+            name = "<Unknown: [{command}]>".format(command=command.number)
         return name
 
     def wait(self):
         """Initiate wait for incoming events in event queue."""
         while True:
             (command, data) = self._event_queue.get()
-            priority = self._priorities[command]
+            priority = self._priorities.get(command.command_type)
             event = Event(command, data, timestamp=datetime.now(), priority=priority)
             event.description = self._describe(event)
             for notifier in self._notifiers:

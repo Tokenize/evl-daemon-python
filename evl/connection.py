@@ -3,7 +3,7 @@ import gevent.queue
 from gevent import socket
 
 from . import tpi
-from .command import CommandType, LoginType
+from .command import Command, CommandType, LoginType
 from .event import EventManager
 
 
@@ -96,12 +96,12 @@ class Connection:
         while True:
             event = self._recv_queue.get()
 
-            command = CommandType(tpi.command(event))
+            command = Command(tpi.command(event))
             data = tpi.data(event)
-            if command == CommandType.LOGIN and LoginType(data) == LoginType.PASSWORD_REQUEST:
+            if command.command_type == CommandType.LOGIN and LoginType(data) == LoginType.PASSWORD_REQUEST:
                 print("Logging in...")
                 self.send(CommandType.NETWORK_LOGIN, self.password)
-            elif command == CommandType.COMMAND_ACKNOWLEDGE:
+            elif command.command_type == CommandType.COMMAND_ACKNOWLEDGE:
                 self._ack_queue.put(event)
             else:
                 self._event_queue.put((command, data))
