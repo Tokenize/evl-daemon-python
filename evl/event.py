@@ -95,7 +95,7 @@ class Event:
             timestamp = datetime.now()
         self.timestamp = timestamp
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.description
 
 
@@ -104,16 +104,44 @@ class EventManager:
     Represents an event manager that waits for incoming events from an event queue
     and dispatches events to its list of event notifiers.
     """
-    def __init__(self, event_queue, notifiers: list=None, command_names: dict=None,
-                 priorities: dict=None, login_names: dict=None):
+    def __init__(self, event_queue, notifiers: list=None, priorities: dict=None, command_names: dict=None,
+                 login_names: dict=None, zones: dict=None, partitions: dict=None):
+
         if notifiers is None:
             notifiers = []
         self._notifiers = notifiers
         self._event_queue = event_queue
 
-        self._command_names = EventManager.merge_dicts(COMMAND_NAMES, overrides=command_names)
-        self._priorities = EventManager.merge_dicts(COMMAND_PRIORITIES, overrides=priorities)
-        self._login_names = EventManager.merge_dicts(LOGIN_TYPE_NAMES, overrides=login_names)
+        self._priorities = merge_dicts(COMMAND_PRIORITIES, overrides=priorities)
+        self._command_names = merge_dicts(COMMAND_NAMES, overrides=command_names)
+        self._login_names = merge_dicts(LOGIN_TYPE_NAMES, overrides=login_names)
+
+        self.zones = zones
+        self.partitions = partitions
+
+    @property
+    def priorities(self) -> dict:
+        return self._priorities
+
+    @priorities.setter
+    def priorities(self, value: dict):
+        self._priorities = merge_dicts(COMMAND_PRIORITIES, value)
+
+    @property
+    def command_names(self) -> dict:
+        return self._command_names
+
+    @command_names.setter
+    def command_names(self, value: dict):
+        self._command_names = merge_dicts(COMMAND_NAMES, value)
+
+    @property
+    def login_names(self) -> dict:
+        return self._login_names
+
+    @login_names.setter
+    def login_names(self, value):
+        self._login_names = merge_dicts(LOGIN_TYPE_NAMES, value)
 
     def add_notifier(self, notifier):
         """
@@ -122,7 +150,7 @@ class EventManager:
         """
         self._notifiers.append(notifier)
 
-    def _describe(self, event: Event):
+    def _describe(self, event: Event) -> str:
         """
         Describes the given event based on the event's command and data.
         :param event: Event to describe
@@ -136,7 +164,7 @@ class EventManager:
             description = "{command}".format(command=cmd_desc)
         return description
 
-    def _describe_command(self, command: Command):
+    def _describe_command(self, command: Command) -> str:
         """
         Describes the given command.
         :param command: Command to describe
