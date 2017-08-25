@@ -2,6 +2,7 @@ from datetime import datetime
 
 from .command import Command, CommandType, LedState, LoginType,\
     Priority, PartitionArmedType
+from .util import merge_dicts
 
 
 COMMAND_NAMES = {
@@ -155,15 +156,3 @@ class EventManager:
             event.description = self._describe(event)
             for notifier in self._notifiers:
                 notifier.notify(event)
-
-    @staticmethod
-    def merge_dicts(default: dict, overrides: dict=None):
-        """
-        Merge given default dictionary of values with given overrides.
-        :param default: Default dictionary of values
-        :param overrides: Dictionary of value overrides
-        :return: Merged dictionary
-        """
-        if overrides:
-            return {**default, **overrides}
-        return default
