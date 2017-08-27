@@ -116,7 +116,12 @@ class EventManager:
         self._command_names = merge_dicts(COMMAND_NAMES, overrides=command_names)
         self._login_names = merge_dicts(LOGIN_TYPE_NAMES, overrides=login_names)
 
+        if zones is None:
+            zones = {}
         self.zones = zones
+
+        if partitions is None:
+            partitions = {}
         self.partitions = partitions
 
     @property
