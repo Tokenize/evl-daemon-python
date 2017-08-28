@@ -13,6 +13,8 @@ COMMAND_NAMES = {
     CommandType.LOGIN: "Login",
     CommandType.KEYPAD_LED_FLASH_STATE: "Keypad LED Flash State",
     CommandType.KEYPAD_LED_STATE: "Keypad LED State",
+    CommandType.ZONE_FAULT: "Zone Fault",
+    CommandType.ZONE_FAULT_RESTORE: "Zone Fault Restore",
     CommandType.ZONE_OPEN: "Zone Open",
     CommandType.ZONE_RESTORED: "Zone Restored",
     CommandType.PARTITION_READY: "Partition Ready",
@@ -25,7 +27,9 @@ COMMAND_NAMES = {
     CommandType.PARTITION_IS_BUSY: "Partition is Busy",
     CommandType.SPECIAL_CLOSING: "Special Closing",
     CommandType.USER_OPENING: "User Opening",
-    CommandType.TROUBLE_LED_OFF: "Trouble LED Off"
+    CommandType.TROUBLE_LED_OFF: "Trouble LED Off",
+    CommandType.FIRE_TROUBLE_ALARM: "Fire Trouble Alarm",
+    CommandType.FIRE_TROUBLE_ALARM_RESTORE: "Fire Trouble Alarm Restore"
 }
 
 COMMAND_PRIORITIES = {
@@ -36,6 +40,8 @@ COMMAND_PRIORITIES = {
     CommandType.LOGIN: Priority.LOW,
     CommandType.KEYPAD_LED_FLASH_STATE: Priority.LOW,
     CommandType.KEYPAD_LED_STATE: Priority.LOW,
+    CommandType.ZONE_FAULT: Priority.MEDIUM,
+    CommandType.ZONE_FAULT_RESTORE: Priority.LOW,
     CommandType.ZONE_OPEN: Priority.LOW,
     CommandType.ZONE_RESTORED: Priority.MEDIUM,
     CommandType.PARTITION_READY: Priority.LOW,
@@ -48,7 +54,9 @@ COMMAND_PRIORITIES = {
     CommandType.PARTITION_IS_BUSY: Priority.LOW,
     CommandType.SPECIAL_CLOSING: Priority.LOW,
     CommandType.USER_OPENING: Priority.LOW,
-    CommandType.TROUBLE_LED_OFF: Priority.LOW
+    CommandType.TROUBLE_LED_OFF: Priority.LOW,
+    CommandType.FIRE_TROUBLE_ALARM: Priority.CRITICAL,
+    CommandType.FIRE_TROUBLE_ALARM_RESTORE: Priority.LOW,
 }
 
 LED_STATE_NAMES = {

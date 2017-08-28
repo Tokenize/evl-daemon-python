@@ -9,6 +9,8 @@ class CommandType(Enum):
     LOGIN = "505"
     KEYPAD_LED_STATE = "510"
     KEYPAD_LED_FLASH_STATE = "511"
+    ZONE_FAULT = "605"
+    ZONE_FAULT_RESTORE = "606"
     ZONE_OPEN = "609"
     ZONE_RESTORED = "610"
     PARTITION_READY = "650"
@@ -22,6 +24,8 @@ class CommandType(Enum):
     SPECIAL_CLOSING = "701"
     USER_OPENING = "750"
     TROUBLE_LED_OFF = "841"
+    FIRE_TROUBLE_ALARM = "842"
+    FIRE_TROUBLE_ALARM_RESTORE = "843"
 
 
 class LedState(Enum):
