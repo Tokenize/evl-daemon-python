@@ -84,6 +84,27 @@ PARTITION_ARMED_NAMES = {
     PartitionArmedType.ZERO_ENTRY_STAY: "Zero Entry Stay"
 }
 
+LOGIN_COMMANDS = {
+    CommandType.LOGIN
+}
+
+PARTITION_COMMANDS = {
+    CommandType.PARTITION_READY,
+    CommandType.PARTITION_NOT_READY,
+    CommandType.PARTITION_ARMED,
+    CommandType.PARTITION_IN_ALARM,
+    CommandType.PARTITION_DISARMED,
+    CommandType.EXIT_DELAY_IN_PROGRESS,
+    CommandType.ENTRY_DELAY_IN_PROGRESS,
+}
+
+ZONE_COMMANDS = {
+    CommandType.ZONE_FAULT,
+    CommandType.ZONE_FAULT_RESTORE,
+    CommandType.ZONE_OPEN,
+    CommandType.ZONE_RESTORED
+}
+
 
 class Event:
     """
@@ -163,6 +184,7 @@ class EventManager:
         """
         self._notifiers.append(notifier)
 
+
     def _describe(self, event: Event) -> str:
         """
         Describes the given event based on the event's command and data.
@@ -170,9 +192,12 @@ class EventManager:
         :return: Description of event
         """
         cmd_desc = self._describe_command(event.command)
-        if event.command.command_type == CommandType.LOGIN:
+        command_type = event.command.command_type
+        if command_type in LOGIN_COMMANDS:
             login_type = LoginType(event.data)
             description = "{command}: {login}".format(command=cmd_desc, login=self._login_names[login_type])
+        elif command_type in ZONE_COMMANDS:
+            description = "{command}: {zone}".format(command=cmd_desc, zone=self._zone_name(event.data))
         else:
             description = "{command}".format(command=cmd_desc)
         return description
@@ -187,6 +212,12 @@ class EventManager:
         if name is None:
             name = "<Unknown: [{command}]>".format(command=command.number)
         return name
+
+    def _zone_name(self, zone: str) -> str:
+        return self.zones.get(zone, zone)
+
+    def _partition_name(self, partition: str) -> str:
+        return self.partitions.get(partition, partition)
 
     def wait(self):
         """Initiate wait for incoming events in event queue."""
