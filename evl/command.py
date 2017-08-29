@@ -32,31 +32,6 @@ class CommandType(Enum):
     FIRE_TROUBLE_ALARM_RESTORE = "843"
 
 
-class LedState(Enum):
-    READY = "0"
-    ARMED = "1"
-    MEMORY = "2"
-    BYPASS = "3"
-    TROUBLE = "4"
-    PROGRAM = "5"
-    FIRE = "6"
-    BACKLIGHT = "7"
-
-
-class LoginType(Enum):
-    INCORRECT_PASSWORD = "0"
-    LOGIN_SUCCESSFUL = "1"
-    TIME_OUT = "2"
-    PASSWORD_REQUEST = "3"
-
-
-class PartitionArmedType(Enum):
-    AWAY = "0"
-    STAY = "1"
-    ZERO_ENTRY_AWAY = "2"
-    ZERO_ENTRY_STAY = "3"
-
-
 class Command:
     def __init__(self, number: str):
         self.number = number

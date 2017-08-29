@@ -1,8 +1,9 @@
 from datetime import datetime
 from enum import Enum
 
-from .command import Command, CommandType, LedState, LoginType, PartitionArmedType
-from .data import parse, LOGIN_COMMANDS, PARTITION_COMMANDS, PARTITION_AND_ZONE_COMMANDS, ZONE_COMMANDS
+from .command import Command, CommandType
+from .data import (parse, LedState, LoginType, PartitionArmedType,
+                   LOGIN_COMMANDS, PARTITION_COMMANDS, PARTITION_AND_ZONE_COMMANDS, ZONE_COMMANDS)
 
 
 class Priority(Enum):
@@ -131,7 +132,7 @@ class Event:
         if self.partition is None:
             return ""
         return EventManager.partitions.get(self.partition,
-                                    "Partition {partition}".format(partition=self.partition))
+                                           "Partition {partition}".format(partition=self.partition))
 
     def __str__(self) -> str:
         return self.description

@@ -3,7 +3,8 @@ import gevent.queue
 from gevent import socket
 
 from . import tpi
-from .command import Command, CommandType, LoginType
+from .command import Command, CommandType
+from .data import LoginType
 from .event import EventManager
 
 
