@@ -6,7 +6,7 @@ import socket
 import signal
 import gevent.signal
 
-from evl.event import Priority
+from evl.event import Event, Priority
 from evl.connection import Connection
 from evl.notifiers.consolenotifier import ConsoleNotifier
 
@@ -62,8 +62,9 @@ if __name__ == '__main__':
         if new_notifier:
             connection.event_manager.add_notifier(new_notifier)
 
-    connection.event_manager.zones = config.get('zones', {})
-    connection.event_manager.partitions = config.get('partitions', {})
+    # Assign zone and partition names as read from configuration file.
+    Event.zones = config.get('zones', {})
+    Event.partitions = config.get('partitions', {})
 
     gevent.signal(signal.SIGINT, connection.stop)
 

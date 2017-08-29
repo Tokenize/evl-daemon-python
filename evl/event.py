@@ -127,16 +127,30 @@ class Event:
     zones = {}
     partitions = {}
 
-    def __init__(self, command: Command, data: str= "", timestamp=None):
+    def __init__(self, command: Command, data: dict, timestamp=None):
         self.command = command
-        self.data = data
         self.description = ""
+
+        self.data = data.get('data', None)
+        self.zone = data.get('zone', None)
+        self.partition = data.get('partition', None)
 
         self.priority = Event.priorities.get(command.command_type, Priority.LOW)
 
         if timestamp is None:
             timestamp = datetime.now()
         self.timestamp = timestamp
+
+    def zone_name(self) -> str:
+        if self.zone is None:
+            return ""
+        return Event.zones.get(self.zone, "Zone {zone}".format(zone=self.zone))
+
+    def partition_name(self) -> str:
+        if self.partition is None:
+            return ""
+        return Event.partitions.get(self.partition,
+                                    "Partition {partition}".format(partition=self.partition))
 
     def __str__(self) -> str:
         return self.description
@@ -148,7 +162,7 @@ class EventManager:
     and dispatches events to its list of event notifiers.
     """
     def __init__(self, event_queue, notifiers: list=None, priorities: dict=None, command_names: dict=None,
-                 login_names: dict=None, zones: dict=None, partitions: dict=None):
+                 login_names: dict=None):
 
         if notifiers is None:
             notifiers = []
@@ -158,22 +172,6 @@ class EventManager:
         Event.priorities = merge_dicts(COMMAND_PRIORITIES, overrides=priorities)
         self._command_names = merge_dicts(COMMAND_NAMES, overrides=command_names)
         self._login_names = merge_dicts(LOGIN_TYPE_NAMES, overrides=login_names)
-
-        if zones is None:
-            zones = {}
-        self.zones = zones
-
-        if partitions is None:
-            partitions = {}
-        self.partitions = partitions
-
-    @property
-    def priorities(self) -> dict:
-        return self._priorities
-
-    @priorities.setter
-    def priorities(self, value: dict):
-        self._priorities = merge_dicts(COMMAND_PRIORITIES, value)
 
     @property
     def command_names(self) -> dict:
@@ -198,7 +196,6 @@ class EventManager:
         """
         self._notifiers.append(notifier)
 
-
     def _describe(self, event: Event) -> str:
         """
         Describes the given event based on the event's command and data.
@@ -211,7 +208,7 @@ class EventManager:
             login_type = LoginType(event.data)
             description = "{command}: {login}".format(command=cmd_desc, login=self._login_names[login_type])
         elif command_type in ZONE_COMMANDS:
-            description = "{command}: {zone}".format(command=cmd_desc, zone=self._zone_name(event.data))
+            description = "{command}: {zone}".format(command=cmd_desc, zone=event.zone_name())
         else:
             description = "{command}".format(command=cmd_desc)
         return description
@@ -227,17 +224,22 @@ class EventManager:
             name = "<Unknown: [{command}]>".format(command=command.number)
         return name
 
-    def _zone_name(self, zone: str) -> str:
-        return self.zones.get(zone, zone)
+    def _parse_data(self, command: Command, data: str) -> dict:
+        parsed = {}
+        command_type = command.command_type
 
-    def _partition_name(self, partition: str) -> str:
-        return self.partitions.get(partition, partition)
+        parsed['data'] = data
+        if command_type in ZONE_COMMANDS:
+            parsed['zone'] = data
+
+        return parsed
 
     def wait(self):
         """Initiate wait for incoming events in event queue."""
         while True:
             (command, data) = self._event_queue.get()
-            event = Event(command, data, timestamp=datetime.now())
+            parsed_data = self._parse_data(command, data)
+            event = Event(command, parsed_data, datetime.now())
             event.description = self._describe(event)
             for notifier in self._notifiers:
                 notifier.notify(event)
