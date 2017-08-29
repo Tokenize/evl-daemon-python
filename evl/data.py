@@ -4,6 +4,7 @@ from .command import Command, CommandType
 LOGIN_COMMANDS = {
     CommandType.LOGIN
 }
+
 PARTITION_COMMANDS = {
     CommandType.PARTITION_READY,
     CommandType.PARTITION_NOT_READY,
@@ -13,12 +14,14 @@ PARTITION_COMMANDS = {
     CommandType.EXIT_DELAY_IN_PROGRESS,
     CommandType.ENTRY_DELAY_IN_PROGRESS,
 }
+
 PARTITION_AND_ZONE_COMMANDS = {
     CommandType.ZONE_ALARM,
     CommandType.ZONE_ALARM_RESTORE,
     CommandType.ZONE_TAMPER,
     CommandType.ZONE_TAMPER_RESTORE,
 }
+
 ZONE_COMMANDS = {
     CommandType.ZONE_FAULT,
     CommandType.ZONE_FAULT_RESTORE,
