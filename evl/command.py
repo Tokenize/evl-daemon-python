@@ -53,16 +53,6 @@ class PartitionArmedType(Enum):
     ZERO_ENTRY_STAY = "3"
 
 
-class Priority(Enum):
-    LOW = 0
-    MEDIUM = 1
-    HIGH = 2
-    CRITICAL = 3
-
-    def __str__(self):
-        return self.name.title()
-
-
 class Command:
     def __init__(self, number: str):
         self.number = number

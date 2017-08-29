@@ -1,8 +1,18 @@
 from datetime import datetime
+from enum import Enum
 
-from .command import Command, CommandType, LedState, LoginType,\
-    Priority, PartitionArmedType
+from .command import Command, CommandType, LedState, LoginType, PartitionArmedType
 from .util import merge_dicts
+
+
+class Priority(Enum):
+    LOW = 0
+    MEDIUM = 1
+    HIGH = 2
+    CRITICAL = 3
+
+    def __str__(self):
+        return self.name.title()
 
 
 COMMAND_NAMES = {
@@ -31,6 +41,7 @@ COMMAND_NAMES = {
     CommandType.FIRE_TROUBLE_ALARM: "Fire Trouble Alarm",
     CommandType.FIRE_TROUBLE_ALARM_RESTORE: "Fire Trouble Alarm Restore"
 }
+
 
 COMMAND_PRIORITIES = {
     CommandType.POLL: Priority.LOW,

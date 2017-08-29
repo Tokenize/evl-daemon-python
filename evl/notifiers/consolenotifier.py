@@ -1,8 +1,7 @@
 from datetime import datetime
 
 
-from evl.command import Priority
-from evl.event import Event
+from evl.event import Event, Priority
 
 
 class ConsoleNotifier:

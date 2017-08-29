@@ -6,7 +6,7 @@ import socket
 import signal
 import gevent.signal
 
-from evl.command import Priority
+from evl.event import Priority
 from evl.connection import Connection
 from evl.notifiers.consolenotifier import ConsoleNotifier
 
