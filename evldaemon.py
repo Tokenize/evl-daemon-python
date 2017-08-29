@@ -1,13 +1,12 @@
 import argparse
 import json
 import os.path
-import sys
 import socket
 import signal
 import gevent.signal
 
-from evl.event import Event, Priority
 from evl.connection import Connection
+from evl.event import EventManager, Priority
 from evl.notifiers.consolenotifier import ConsoleNotifier
 
 
@@ -63,8 +62,10 @@ if __name__ == '__main__':
             connection.event_manager.add_notifier(new_notifier)
 
     # Assign zone and partition names as read from configuration file.
-    Event.zones = config.get('zones', {})
-    Event.partitions = config.get('partitions', {})
+    EventManager.zones = config.get('zones', {})
+    EventManager.partitions = config.get('partitions', {})
+
+    # TODO: Read command name, priority, login name, etc. overrides from config.
 
     gevent.signal(signal.SIGINT, connection.stop)
 

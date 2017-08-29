@@ -3,7 +3,6 @@ from enum import Enum
 
 from .command import Command, CommandType, LedState, LoginType, PartitionArmedType
 from .data import parse, LOGIN_COMMANDS, PARTITION_COMMANDS, PARTITION_AND_ZONE_COMMANDS, ZONE_COMMANDS
-from .util import merge_dicts
 
 
 class Priority(Enum):
@@ -14,7 +13,6 @@ class Priority(Enum):
 
     def __str__(self):
         return self.name.title()
-
 
 COMMAND_NAMES = {
     CommandType.POLL: "Poll",
@@ -46,7 +44,6 @@ COMMAND_NAMES = {
     CommandType.FIRE_TROUBLE_ALARM: "Fire Trouble Alarm",
     CommandType.FIRE_TROUBLE_ALARM_RESTORE: "Fire Trouble Alarm Restore"
 }
-
 
 COMMAND_PRIORITIES = {
     CommandType.POLL: Priority.LOW,
@@ -111,10 +108,6 @@ class Event:
     priority, timestamp and string description of the event.
     """
 
-    priorities = COMMAND_PRIORITIES
-    zones = {}
-    partitions = {}
-
     def __init__(self, command: Command, data: dict, timestamp=None):
         self.command = command
         self.description = ""
@@ -123,7 +116,7 @@ class Event:
         self.zone = data.get('zone', None)
         self.partition = data.get('partition', None)
 
-        self.priority = Event.priorities.get(command.command_type, Priority.LOW)
+        self.priority = EventManager.priorities.get(command.command_type, Priority.LOW)
 
         if timestamp is None:
             timestamp = datetime.now()
@@ -132,12 +125,12 @@ class Event:
     def zone_name(self) -> str:
         if self.zone is None:
             return ""
-        return Event.zones.get(self.zone, "Zone {zone}".format(zone=self.zone))
+        return EventManager.zones.get(self.zone, "Zone {zone}".format(zone=self.zone))
 
     def partition_name(self) -> str:
         if self.partition is None:
             return ""
-        return Event.partitions.get(self.partition,
+        return EventManager.partitions.get(self.partition,
                                     "Partition {partition}".format(partition=self.partition))
 
     def __str__(self) -> str:
@@ -149,33 +142,20 @@ class EventManager:
     Represents an event manager that waits for incoming events from an event queue
     and dispatches events to its list of event notifiers.
     """
-    def __init__(self, event_queue, notifiers: list=None, priorities: dict=None, command_names: dict=None,
-                 login_names: dict=None):
+
+    command_names = COMMAND_NAMES
+    login_names = LOGIN_TYPE_NAMES
+    priorities = COMMAND_PRIORITIES
+
+    partitions = {}
+    zones = {}
+
+    def __init__(self, event_queue, notifiers: list=None):
 
         if notifiers is None:
             notifiers = []
         self._notifiers = notifiers
         self._event_queue = event_queue
-
-        Event.priorities = merge_dicts(COMMAND_PRIORITIES, overrides=priorities)
-        self._command_names = merge_dicts(COMMAND_NAMES, overrides=command_names)
-        self._login_names = merge_dicts(LOGIN_TYPE_NAMES, overrides=login_names)
-
-    @property
-    def command_names(self) -> dict:
-        return self._command_names
-
-    @command_names.setter
-    def command_names(self, value: dict):
-        self._command_names = merge_dicts(COMMAND_NAMES, value)
-
-    @property
-    def login_names(self) -> dict:
-        return self._login_names
-
-    @login_names.setter
-    def login_names(self, value):
-        self._login_names = merge_dicts(LOGIN_TYPE_NAMES, value)
 
     def add_notifier(self, notifier):
         """
@@ -194,11 +174,13 @@ class EventManager:
         command_type = event.command.command_type
         if command_type in LOGIN_COMMANDS:
             login_type = LoginType(event.data)
-            description = "{command}: {login}".format(command=cmd_desc, login=self._login_names[login_type])
+            description = "{command}: {login}".format(command=cmd_desc,
+                                                      login=EventManager.login_names[login_type])
         elif command_type in PARTITION_COMMANDS:
             description = "{command}: [{partition}]".format(command=cmd_desc, partition=event.partition_name())
         elif command_type in PARTITION_AND_ZONE_COMMANDS:
-            description = "{command}: [{partition}] {zone}".format(command=cmd_desc, partition=event.partition_name(),
+            description = "{command}: [{partition}] {zone}".format(command=cmd_desc,
+                                                                   partition=event.partition_name(),
                                                                    zone=event.zone_name())
         elif command_type in ZONE_COMMANDS:
             description = "{command}: {zone}".format(command=cmd_desc, zone=event.zone_name())
@@ -212,7 +194,7 @@ class EventManager:
         :param command: Command to describe
         :return: Description of command
         """
-        name = self._command_names.get(command.command_type)
+        name = EventManager.command_names.get(command.command_type)
         if name is None:
             name = "<Unknown: [{command}]>".format(command=command.number)
         return name
