@@ -122,14 +122,17 @@ class Event:
     Represents an event from the EVL module, including the command, data,
     priority, timestamp and string description of the event.
     """
-    def __init__(self, command: Command, data: str= "", priority: Priority=Priority.LOW, timestamp=None):
+
+    priorities = COMMAND_PRIORITIES
+    zones = {}
+    partitions = {}
+
+    def __init__(self, command: Command, data: str= "", timestamp=None):
         self.command = command
         self.data = data
         self.description = ""
 
-        if priority is None:
-            priority = Priority.LOW
-        self.priority = priority
+        self.priority = Event.priorities.get(command.command_type, Priority.LOW)
 
         if timestamp is None:
             timestamp = datetime.now()
@@ -152,7 +155,7 @@ class EventManager:
         self._notifiers = notifiers
         self._event_queue = event_queue
 
-        self._priorities = merge_dicts(COMMAND_PRIORITIES, overrides=priorities)
+        Event.priorities = merge_dicts(COMMAND_PRIORITIES, overrides=priorities)
         self._command_names = merge_dicts(COMMAND_NAMES, overrides=command_names)
         self._login_names = merge_dicts(LOGIN_TYPE_NAMES, overrides=login_names)
 
@@ -234,8 +237,7 @@ class EventManager:
         """Initiate wait for incoming events in event queue."""
         while True:
             (command, data) = self._event_queue.get()
-            priority = self._priorities.get(command.command_type)
-            event = Event(command, data, timestamp=datetime.now(), priority=priority)
+            event = Event(command, data, timestamp=datetime.now())
             event.description = self._describe(event)
             for notifier in self._notifiers:
                 notifier.notify(event)
