@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from .command import Command, CommandType, LedState, LoginType, PartitionArmedType
+from .data import parse, LOGIN_COMMANDS, PARTITION_COMMANDS, PARTITION_AND_ZONE_COMMANDS, ZONE_COMMANDS
 from .util import merge_dicts
 
 
@@ -95,27 +96,6 @@ PARTITION_ARMED_NAMES = {
     PartitionArmedType.ZERO_ENTRY_STAY: "Zero Entry Stay"
 }
 
-LOGIN_COMMANDS = {
-    CommandType.LOGIN
-}
-
-PARTITION_COMMANDS = {
-    CommandType.PARTITION_READY,
-    CommandType.PARTITION_NOT_READY,
-    CommandType.PARTITION_ARMED,
-    CommandType.PARTITION_IN_ALARM,
-    CommandType.PARTITION_DISARMED,
-    CommandType.EXIT_DELAY_IN_PROGRESS,
-    CommandType.ENTRY_DELAY_IN_PROGRESS,
-}
-
-ZONE_COMMANDS = {
-    CommandType.ZONE_FAULT,
-    CommandType.ZONE_FAULT_RESTORE,
-    CommandType.ZONE_OPEN,
-    CommandType.ZONE_RESTORED
-}
-
 
 class Event:
     """
@@ -207,6 +187,11 @@ class EventManager:
         if command_type in LOGIN_COMMANDS:
             login_type = LoginType(event.data)
             description = "{command}: {login}".format(command=cmd_desc, login=self._login_names[login_type])
+        elif command_type in PARTITION_COMMANDS:
+            description = "{command}: [{partition}]".format(command=cmd_desc, partition=event.partition_name())
+        elif command_type in PARTITION_AND_ZONE_COMMANDS:
+            description = "{command}: [{partition}] {zone}".format(command=cmd_desc, partition=event.partition_name(),
+                                                                   zone=event.zone_name())
         elif command_type in ZONE_COMMANDS:
             description = "{command}: {zone}".format(command=cmd_desc, zone=event.zone_name())
         else:
@@ -224,21 +209,11 @@ class EventManager:
             name = "<Unknown: [{command}]>".format(command=command.number)
         return name
 
-    def _parse_data(self, command: Command, data: str) -> dict:
-        parsed = {}
-        command_type = command.command_type
-
-        parsed['data'] = data
-        if command_type in ZONE_COMMANDS:
-            parsed['zone'] = data
-
-        return parsed
-
     def wait(self):
         """Initiate wait for incoming events in event queue."""
         while True:
             (command, data) = self._event_queue.get()
-            parsed_data = self._parse_data(command, data)
+            parsed_data = parse(command, data)
             event = Event(command, parsed_data, datetime.now())
             event.description = self._describe(event)
             for notifier in self._notifiers:
