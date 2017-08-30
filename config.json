@@ -1,0 +1,28 @@
+{
+    "ip": "127.0.0.1",
+    "port": "4025",
+    "password": "SECRET",
+
+    "zones": {
+        "001": "Front Door",
+        "002": "Garage Door",
+        "003": "Back Door",
+        "004": "Living Room Window",
+        "005": "Kitchen Window",
+        "006": "Family Room Window",
+        "007": "Basement Window",
+        "008": "Motion Sensor"
+    },
+
+    "partitions": {
+        "1": "Main"
+    },
+
+    "notifiers": [
+        {
+            "name": "console",
+            "type": "console",
+            "priority": "Low"
+        }
+    ]
+}
