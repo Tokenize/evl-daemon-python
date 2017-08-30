@@ -63,10 +63,12 @@ def parse(command: Command, data: str) -> dict:
 
     parsed['data'] = data
     if command_type in ZONE_COMMANDS:
-        parsed['zone'] = data
+        # Zone commands always have zone as first 3 chars
+        parsed['zone'] = data[0:3]
 
     if command_type in PARTITION_COMMANDS:
-        parsed['partition'] = data
+        # Partition commands always have partition as first char
+        parsed['partition'] = data[:1]
 
     if command_type in PARTITION_AND_ZONE_COMMANDS:
         parsed['partition'] = data[:1]
