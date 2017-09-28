@@ -185,6 +185,9 @@ class EventManager:
                                                                    zone=event.zone_name())
         elif command_type in ZONE_COMMANDS:
             description = "{command}: {zone}".format(command=cmd_desc, zone=event.zone_name())
+        elif command_type in (CommandType.KEYPAD_LED_FLASH_STATE, CommandType.KEYPAD_LED_STATE):
+            led_state = self._describe_led_state(event.data)
+            description = "{command}: {state}".format(command=cmd_desc, state=led_state)
         else:
             description = "{command}".format(command=cmd_desc)
         return description
@@ -199,6 +202,10 @@ class EventManager:
         if name is None:
             name = "<Unknown: [{command}]>".format(command=command.number)
         return name
+
+    def _describe_led_state(self, state: str) -> str:
+        leds = [LedState(str(ind)).name.title() for ind, st in enumerate(state) if st == "1"]
+        return ", ".join(leds)
 
     def wait(self):
         """Initiate wait for incoming events in event queue."""
