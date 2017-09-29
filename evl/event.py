@@ -204,7 +204,20 @@ class EventManager:
         return name
 
     def _describe_led_state(self, state: str) -> str:
-        leds = [LedState(str(ind)).name.title() for ind, st in enumerate(state) if st == "1"]
+        """
+        Describes the given hex value LED state.
+
+        Converts the given hex value to a string of bits representing the LED
+        states and returns the enabled LEDs in a comma-separated string. Details
+        about LED state can be found in the EnvisaLink TPI documentation.
+        :param state: Hex value of LED state
+        :return: Comma-separated string of enabled LEDs
+        """
+        state_base = 16
+        state_width = 8
+
+        bin_state = bin(int(state, state_base))[2:].zfill(state_width)
+        leds = [LedState(str(ind)).name.title() for ind, st in enumerate(bin_state) if st == "1"]
         return ", ".join(leds)
 
     def wait(self):

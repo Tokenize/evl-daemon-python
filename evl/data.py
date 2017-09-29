@@ -33,14 +33,14 @@ ZONE_COMMANDS = {
 
 
 class LedState(Enum):
-    READY = "0"
-    ARMED = "1"
-    MEMORY = "2"
-    BYPASS = "3"
-    TROUBLE = "4"
-    PROGRAM = "5"
-    FIRE = "6"
-    BACKLIGHT = "7"
+    READY = "7"
+    ARMED = "6"
+    MEMORY = "5"
+    BYPASS = "4"
+    TROUBLE = "3"
+    PROGRAM = "2"
+    FIRE = "1"
+    BACKLIGHT = "0"
 
 
 class LoginType(Enum):

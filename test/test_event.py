@@ -23,8 +23,8 @@ class TestEventManager(unittest.TestCase):
         self.assertEqual("LOGIN!", mgr._describe_command(command))
 
     def test_led_state_describe(self):
-        state = "01010101"
-        state_str = "Armed, Bypass, Program, Backlight"
+        state = "83"
+        state_str = "Backlight, Armed, Ready"
         mgr = event.EventManager(None)
 
         self.assertEqual(state_str, mgr._describe_led_state(state))
