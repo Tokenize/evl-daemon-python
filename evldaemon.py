@@ -8,6 +8,7 @@ import gevent.signal
 from evl.connection import Connection
 from evl.event import EventManager, Priority
 from evl.notifiers.consolenotifier import ConsoleNotifier
+from evl.notifiers.smsnotifier import SmsNotifier
 
 
 def read_config(file: str) -> dict:
@@ -55,6 +56,14 @@ if __name__ == '__main__':
 
         if notifier['type'] == 'console':
             new_notifier = ConsoleNotifier(priority=priority)
+        elif notifier['type'] == 'sms':
+            layout = notifier.get('layout')
+            settings = notifier.get('settings')
+            sender = settings.get('sender')
+            recipient = settings.get('recipient')
+            sid = settings.get('sid')
+            auth_token = settings.get('authToken')
+            new_notifier = SmsNotifier(sid, auth_token, sender, recipient, priority, layout)
         else:
             new_notifier = None
 

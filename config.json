@@ -23,6 +23,17 @@
             "name": "console",
             "type": "console",
             "priority": "Low"
+        },
+        {
+            "name": "sms",
+            "type": "sms",
+            "priority": "High",
+            "settings": {
+                "sid": "twilio account SID",
+                "authToken": "twilio auth token",
+                "sender": "+15555555555",
+                "recipient": "+15555555555"
+            }
         }
     ]
 }
