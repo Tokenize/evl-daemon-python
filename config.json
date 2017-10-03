@@ -34,6 +34,17 @@
                 "sender": "+15555555555",
                 "recipient": "+15555555555"
             }
+        },
+        {
+            "name": "email",
+            "type": "email",
+            "priority": "High",
+            "settings": {
+                "subject": "EvlDaemon Alert!",
+                "sender": "sender@example.com",
+                "recipient": "recipient@example.com",
+                "apiKey": "sendgrid API key"
+            }
         }
     ]
 }

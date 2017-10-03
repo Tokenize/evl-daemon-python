@@ -9,6 +9,7 @@ from evl.connection import Connection
 from evl.event import EventManager, Priority
 from evl.notifiers.consolenotifier import ConsoleNotifier
 from evl.notifiers.smsnotifier import SmsNotifier
+from evl.notifiers.emailnotifier import EmailNotifier
 
 
 def read_config(file: str) -> dict:
@@ -64,6 +65,14 @@ if __name__ == '__main__':
             sid = settings.get('sid')
             auth_token = settings.get('authToken')
             new_notifier = SmsNotifier(sid, auth_token, sender, recipient, priority, layout)
+        elif notifier['type'] == 'email':
+            layout = notifier.get('layout')
+            settings = notifier.get('settings')
+            sender = settings.get('sender')
+            recipient = settings.get('recipient')
+            api_key = settings.get('apiKey')
+            subject = settings.get('subject')
+            new_notifier = EmailNotifier(api_key, sender, recipient, priority, layout, subject)
         else:
             new_notifier = None
 
