@@ -1,4 +1,4 @@
-from datetime import datetime
+from time import localtime, strftime
 
 from twilio.base.exceptions import TwilioException
 from twilio.rest import Client
@@ -22,9 +22,10 @@ class SmsNotifier:
 
         self.client = Client(sid, auth_token)
 
-    def notify(self, event: Event, timestamp=None):
-        if timestamp is None:
-            timestamp = datetime.now()
+        self.timestamp_format = '%Y-%m-%d %H:%M:%S'
+
+    def notify(self, event: Event):
+        timestamp = strftime(self.timestamp_format, localtime(event.timestamp))
 
         if event.priority.value >= self.priority.value:
             self._send_sms(event, timestamp)

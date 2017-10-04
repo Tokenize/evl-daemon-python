@@ -1,5 +1,5 @@
-from datetime import datetime
 from enum import Enum
+import time
 
 from .command import Command, CommandType
 from .data import (parse, LedState, LoginType, PartitionArmedType,
@@ -14,6 +14,7 @@ class Priority(Enum):
 
     def __str__(self):
         return self.name.title()
+
 
 COMMAND_NAMES = {
     CommandType.POLL: "Poll",
@@ -120,7 +121,7 @@ class Event:
         self.priority = EventManager.priorities.get(command.command_type, Priority.LOW)
 
         if timestamp is None:
-            timestamp = datetime.now()
+            timestamp = int(time.time())
         self.timestamp = timestamp
 
     def zone_name(self) -> str:
@@ -225,7 +226,8 @@ class EventManager:
         while True:
             (command, data) = self._event_queue.get()
             parsed_data = parse(command, data)
-            event = Event(command, parsed_data, datetime.now())
+            timestamp = int(time.time())
+            event = Event(command, parsed_data, timestamp)
             event.description = self._describe(event)
             for notifier in self._notifiers:
                 notifier.notify(event)

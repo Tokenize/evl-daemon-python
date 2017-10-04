@@ -1,4 +1,5 @@
-from datetime import datetime
+from time import localtime, strftime
+
 from sendgrid import Email, SendGridAPIClient
 from sendgrid.helpers.mail import Content, Mail
 
@@ -22,17 +23,16 @@ class EmailNotifier:
             self.subject = "EvlDaemon Alert!"
 
         self.client = SendGridAPIClient(apikey=self.api_key)
+        self.timestamp_format = '%Y-%m-%d %H:%M:%S'
 
-    def notify(self, event: Event, timestamp=None):
-        if timestamp is None:
-            timestamp = datetime.now()
+    def notify(self, event: Event):
+        timestamp = strftime(self.timestamp_format, localtime(event.timestamp))
 
         if event.priority.value >= self.priority.value:
             self._send_email(event, timestamp)
 
     def _send_email(self, event: Event, timestamp):
-        message = self.layout.format(timestamp=timestamp,
-                           priority=event.priority, event=event)
+        message = self.layout.format(timestamp=timestamp, priority=event.priority, event=event)
         body = Content(type_="text/plain", value=message)
         mail = Mail(self.sender, self.subject, self.recipient, body)
         response = self.client.client.mail.send.post(request_body=mail.get())

@@ -26,6 +26,7 @@ def read_config(file: str) -> dict:
 
     return data
 
+
 if __name__ == '__main__':
     print("Welcome to EvlDaemon")
 
