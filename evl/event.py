@@ -152,11 +152,16 @@ class EventManager:
     partitions = {}
     zones = {}
 
-    def __init__(self, event_queue, notifiers: list=None):
+    def __init__(self, event_queue, notifiers: list=None, storage: list=None):
 
         if notifiers is None:
             notifiers = []
         self._notifiers = notifiers
+
+        if storage is None:
+            storage = []
+        self._storage = storage
+
         self._event_queue = event_queue
 
     def add_notifier(self, notifier):
@@ -165,6 +170,13 @@ class EventManager:
         :param notifier: Notifier to add to notifier list
         """
         self._notifiers.append(notifier)
+
+    def add_storage(self, storage):
+        """
+        Adds an event storage engine
+        :param storage: Storage engine to add to storage list
+        """
+        self._storage.append(storage)
 
     def _describe(self, event: Event) -> str:
         """
@@ -229,5 +241,9 @@ class EventManager:
             timestamp = int(time.time())
             event = Event(command, parsed_data, timestamp)
             event.description = self._describe(event)
+
+            for storage in self._storage:
+                storage.store(event)
+
             for notifier in self._notifiers:
                 notifier.notify(event)

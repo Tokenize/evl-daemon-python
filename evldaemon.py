@@ -10,6 +10,7 @@ from evl.event import EventManager, Priority
 from evl.notifiers.consolenotifier import ConsoleNotifier
 from evl.notifiers.smsnotifier import SmsNotifier
 from evl.notifiers.emailnotifier import EmailNotifier
+from evl.storage.memory import MemoryStorage
 
 
 def read_config(file: str) -> dict:
@@ -79,6 +80,9 @@ if __name__ == '__main__':
 
         if new_notifier:
             connection.event_manager.add_notifier(new_notifier)
+
+    # Add default in-memory storage
+    connection.event_manager.add_storage(MemoryStorage())
 
     # Assign zone and partition names as read from configuration file.
     EventManager.zones = config.get('zones', {})
