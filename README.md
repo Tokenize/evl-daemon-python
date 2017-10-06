@@ -21,7 +21,7 @@ template. Ensure that the EVL IP, port number and password are specified.
 
 ## Configuration
 
-TODO: This section.
+See [config.json](config.json) for configuration for details.
 
 ## Coming up...
 
