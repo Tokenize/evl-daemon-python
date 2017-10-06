@@ -13,6 +13,9 @@ from evl.notifiers.emailnotifier import EmailNotifier
 from evl.storage.memory import MemoryStorage
 
 
+DEFAULT_STORAGE_MAX_LENGTH = 100
+
+
 def read_config(file: str) -> dict:
     file = os.path.expanduser(file)
 
@@ -81,8 +84,16 @@ if __name__ == '__main__':
         if new_notifier:
             connection.event_manager.add_notifier(new_notifier)
 
-    # Add default in-memory storage
-    connection.event_manager.add_storage(MemoryStorage())
+    for storage in config.get('storage', []):
+        # Set up storage engines defined in configuration file
+        if storage['type'] == 'memory':
+            max_size = config.get('maxSize', DEFAULT_STORAGE_MAX_LENGTH)
+            new_storage = MemoryStorage(size=max_size)
+        else:
+            new_storage = None
+
+        if new_storage:
+            connection.event_manager.add_storage(new_storage)
 
     # Assign zone and partition names as read from configuration file.
     EventManager.zones = config.get('zones', {})

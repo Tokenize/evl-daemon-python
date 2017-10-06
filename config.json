@@ -18,6 +18,16 @@
         "1": "Main"
     },
 
+    "storage": [
+        {
+            "name": "memory",
+            "type": "memory",
+            "settings": {
+                "maxSize": "100"
+            }
+        }
+    ],
+
     "notifiers": [
         {
             "name": "console",
