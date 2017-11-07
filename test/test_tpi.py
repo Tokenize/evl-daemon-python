@@ -18,19 +18,19 @@ class TestTpi(unittest.TestCase):
         self.assertEqual(checksum, "0F")
 
     def test_get_checksum(self):
-        checksum = tpi.checksum("005user54")
+        checksum = tpi.parse_checksum("005user54")
         self.assertEqual(checksum, "54")
 
     def test_get_command(self):
-        command = tpi.command("005user54")
+        command = tpi.parse_command("005user54")
         self.assertEqual(command, "005")
 
     def test_get_data(self):
-        data = tpi.data("005user54")
+        data = tpi.parse_data("005user54")
         self.assertEqual(data, "user")
 
     def test_get_data_with_no_data(self):
-        data = tpi.data("501" + tpi.calculate_checksum("501"))
+        data = tpi.parse_data("501" + tpi.calculate_checksum("501"))
         self.assertEqual(data, "")
 
     def test_validate_checksum_valid(self):

@@ -23,14 +23,14 @@ def validate_checksum(packet: str) -> bool:
     :param packet: Data packet containing command, data and checksum
     :return: True if checksum is correct, False otherwise
     """
-    cmd_data = command(packet) + data(packet)
+    cmd_data = parse_command(packet) + parse_data(packet)
     calculated = calculate_checksum(cmd_data)
-    provided = checksum(packet)
+    provided = parse_checksum(packet)
 
     return calculated == provided
 
 
-def checksum(packet: str) -> str:
+def parse_checksum(packet: str) -> str:
     """Returns the checksum part of the given packet.
 
     :param packet: Data packet
@@ -39,7 +39,7 @@ def checksum(packet: str) -> str:
     return packet[-2:]
 
 
-def data(packet: str) -> str:
+def parse_data(packet: str) -> str:
     """Returns the data part of the given packet.
 
     :param packet: Data packet
@@ -52,7 +52,7 @@ def data(packet: str) -> str:
     return data
 
 
-def command(packet: str) -> str:
+def parse_command(packet: str) -> str:
     """Returns the command part of the given packet.
 
     :param packet: Data packet
