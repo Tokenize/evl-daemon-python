@@ -152,7 +152,7 @@ class EventManager:
     partitions = {}
     zones = {}
 
-    def __init__(self, event_queue, notifiers: list=None, storage: list=None):
+    def __init__(self, event_queue, queue_group=None, notifiers: list=None, storage: list=None):
 
         if notifiers is None:
             notifiers = []
@@ -163,6 +163,10 @@ class EventManager:
         self._storage = storage
 
         self._event_queue = event_queue
+
+        if queue_group is not None:
+            self._queue_group = queue_group
+            self._queue_group.spawn(self.wait)
 
     def add_notifier(self, notifier):
         """
@@ -232,6 +236,9 @@ class EventManager:
         bin_state = bin(int(state, state_base))[2:].zfill(state_width)
         leds = [LedState(str(ind)).name.title() for ind, st in enumerate(bin_state) if st == "1"]
         return ", ".join(leds)
+
+    def enqueue(self, command: Command, data: str = ""):
+        self._event_queue.put((command, data))
 
     def wait(self):
         """Initiate wait for incoming events in event queue."""

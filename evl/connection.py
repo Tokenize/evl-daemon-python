@@ -13,18 +13,18 @@ class Connection:
     Represents a connection to an EVL device. Responsible for connecting to the EVL,
     sending and receiving data, and processing incoming commands as appropriate.
     """
-    def __init__(self, host: str, port: int=4025, password: str=""):
+    def __init__(self, event_manager: EventManager, queue_group: gevent.pool.Group, host: str, port: int=4025, password: str=""):
         self.host = host
         self.port = port
         self.password = password
 
-        self._event_queue = gevent.queue.Queue()
-        self.event_manager = EventManager(self._event_queue)
+        self._event_manager = event_manager
+        self._queue_group = queue_group
 
         self._recv_queue = gevent.queue.Queue()
         self._send_queue = gevent.queue.Queue()
         self._ack_queue = gevent.queue.Queue()
-        self._group = gevent.pool.Group()
+
         self._conn = None
 
     def start(self):
@@ -33,11 +33,10 @@ class Connection:
         the various data handling routines.
         """
         self._connect()
-        self._group.spawn(self._receive)
-        self._group.spawn(self._send)
-        self._group.spawn(self._process)
-        self._group.spawn(self.event_manager.wait)
-        self._group.join()
+
+        self._queue_group.spawn(self._receive)
+        self._queue_group.spawn(self._send)
+        self._queue_group.spawn(self._process)
 
     def _connect(self):
         """Initiates connection to the EVL device."""
@@ -105,14 +104,12 @@ class Connection:
             elif command.command_type == CommandType.COMMAND_ACKNOWLEDGE:
                 self._ack_queue.put(event)
             else:
-                self._event_queue.put((command, data))
+                self._event_manager.enqueue(command, data)
 
     def stop(self):
         """Cleanly stop all processing and disconnect from the EVL device."""
         if self._conn is not None:
             self._conn.close()
-
-        self._group.kill()
 
     def send(self, command: CommandType, data: str= ""):
         """

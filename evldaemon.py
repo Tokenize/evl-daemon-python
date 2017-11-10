@@ -3,6 +3,8 @@ import json
 import os.path
 import socket
 import signal
+import gevent.pool
+import gevent.queue
 import gevent.signal
 
 from evl.connection import Connection
@@ -53,8 +55,12 @@ if __name__ == '__main__':
         print("Password not found in configuration file!")
         exit(1)
 
+    queue_group = gevent.pool.Group()
+    event_queue = gevent.queue.Queue()
+    event_manager = EventManager(event_queue, queue_group)
+
     resolved = socket.gethostbyname(host)
-    connection = Connection(host=resolved, password=password)
+    connection = Connection(event_manager=event_manager, queue_group=queue_group, host=resolved, password=password)
 
     for notifier in config.get('notifiers', []):
         # Set up notifiers defined in configuration file
@@ -82,7 +88,7 @@ if __name__ == '__main__':
             new_notifier = None
 
         if new_notifier:
-            connection.event_manager.add_notifier(new_notifier)
+            event_manager.add_notifier(new_notifier)
 
     for storage in config.get('storage', []):
         # Set up storage engines defined in configuration file
@@ -93,7 +99,7 @@ if __name__ == '__main__':
             new_storage = None
 
         if new_storage:
-            connection.event_manager.add_storage(new_storage)
+            event_manager.add_storage(new_storage)
 
     # Assign zone and partition names as read from configuration file.
     EventManager.zones = config.get('zones', {})
@@ -101,6 +107,9 @@ if __name__ == '__main__':
 
     # TODO: Read command name, priority, login name, etc. overrides from config.
 
+    # Are multiple signal handlers possible?
     gevent.signal(signal.SIGINT, connection.stop)
+    gevent.signal(signal.SIGINT, queue_group.kill)
 
     connection.start()
+    queue_group.join()
