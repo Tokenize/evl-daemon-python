@@ -65,9 +65,10 @@ if __name__ == '__main__':
     for notifier in config.get('notifiers', []):
         # Set up notifiers defined in configuration file
         priority = Priority[notifier.get('priority', 'LOW').upper()]
+        name = notifier.get('name')
 
         if notifier['type'] == 'console':
-            new_notifier = ConsoleNotifier(priority=priority)
+            new_notifier = ConsoleNotifier(priority=priority, name=name)
         elif notifier['type'] == 'sms':
             layout = notifier.get('layout')
             settings = notifier.get('settings')
@@ -75,7 +76,7 @@ if __name__ == '__main__':
             recipient = settings.get('recipient')
             sid = settings.get('sid')
             auth_token = settings.get('authToken')
-            new_notifier = SmsNotifier(sid, auth_token, sender, recipient, priority, layout)
+            new_notifier = SmsNotifier(sid, auth_token, sender, recipient, priority, layout, name)
         elif notifier['type'] == 'email':
             layout = notifier.get('layout')
             settings = notifier.get('settings')
@@ -83,7 +84,7 @@ if __name__ == '__main__':
             recipient = settings.get('recipient')
             api_key = settings.get('apiKey')
             subject = settings.get('subject')
-            new_notifier = EmailNotifier(api_key, sender, recipient, priority, layout, subject)
+            new_notifier = EmailNotifier(api_key, sender, recipient, priority, layout, subject, name)
         else:
             new_notifier = None
 

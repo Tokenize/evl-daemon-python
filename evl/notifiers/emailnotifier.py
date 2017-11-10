@@ -8,13 +8,14 @@ from evl.event import Event, Priority
 
 class EmailNotifier:
     def __init__(self, api_key: str, sender: str, recipient: str,
-                 priority: Priority=Priority.CRITICAL, layout: str=None, subject: str=None):
+                 priority: Priority=Priority.CRITICAL, layout: str=None, subject: str=None, name: str=None):
         self.api_key = api_key
         self.sender = Email(sender)
         self.recipient = Email(recipient)
         self.priority = priority
         self.layout = layout
         self.subject = subject
+        self.name = name
 
         if layout is None:
             self.layout = "[{timestamp}]: [{priority}] {event}"
@@ -22,8 +23,14 @@ class EmailNotifier:
         if subject is None:
             self.subject = "EvlDaemon Alert!"
 
+        if name is None:
+            self.name = "Email Notifier"
+
         self.client = SendGridAPIClient(apikey=self.api_key)
         self.timestamp_format = '%Y-%m-%d %H:%M:%S'
+
+    def __str__(self):
+        return self.name
 
     def notify(self, event: Event):
         timestamp = strftime(self.timestamp_format, localtime(event.timestamp))
