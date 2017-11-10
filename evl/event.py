@@ -253,4 +253,8 @@ class EventManager:
                 storage.store(event)
 
             for notifier in self._notifiers:
-                notifier.notify(event)
+                try:
+                    notifier.notify(event)
+                except Exception as e:
+                    # TODO: Implement better error handling/logging
+                    print("Error notifying on {name}: {exception}".format(name=notifier, exception=e))
