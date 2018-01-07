@@ -168,19 +168,19 @@ class EventManager:
             self._queue_group = queue_group
             self._queue_group.spawn(self.wait)
 
-    def add_notifier(self, notifier):
+    def add_notifiers(self, notifiers: list):
         """
-        Adds a notifier object to the list of notifiers.
-        :param notifier: Notifier to add to notifier list
+        Adds a list of notifiers to the existing list.
+        :param notifiers: List of notifiers to add to notifier list
         """
-        self._notifiers.append(notifier)
+        self._notifiers.extend(notifiers)
 
-    def add_storage(self, storage):
+    def add_storages(self, storages: list):
         """
         Adds an event storage engine
         :param storage: Storage engine to add to storage list
         """
-        self._storage.append(storage)
+        self._storage.extend(storages)
 
     def _describe(self, event: Event) -> str:
         """

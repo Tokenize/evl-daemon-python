@@ -32,6 +32,53 @@ def read_config(file: str) -> dict:
 
     return data
 
+def load_notifiers(config: list):
+    notifiers = []
+    for notifier in config:
+        priority = Priority[notifier.get('priority', 'LOW').upper()]
+        name = notifier.get('name')
+        kind = notifier['type']
+
+        if kind == 'console':
+            new_notifier = ConsoleNotifier(priority=priority, name=name)
+        elif kind == 'sms':
+            layout = notifier.get('layout')
+            settings = notifier.get('settings')
+            sender = settings.get('sender')
+            recipient = settings.get('recipient')
+            sid = settings.get('sid')
+            auth_token = settings.get('authToken')
+            new_notifier = SmsNotifier(sid, auth_token, sender, recipient, priority, layout, name)
+        elif kind == 'email':
+            layout = notifier.get('layout')
+            settings = notifier.get('settings')
+            sender = settings.get('sender')
+            recipient = settings.get('recipient')
+            api_key = settings.get('apiKey')
+            subject = settings.get('subject')
+            new_notifier = EmailNotifier(api_key, sender, recipient, priority, layout, subject, name)
+        else:
+            new_notifier = None
+
+        if new_notifier:
+            notifiers.append(new_notifier)
+    return notifiers
+
+def load_storage(config: list):
+    storages = []
+    for storage in config:
+        kind = storage['type']
+        # Set up storage engines defined in configuration file
+        if kind == 'memory':
+            max_size = storage.get('maxSize', DEFAULT_STORAGE_MAX_LENGTH)
+            new_storage = MemoryStorage(size=max_size)
+        else:
+            new_storage = None
+
+        if new_storage:
+            storages.append(new_storage)
+    return storages
+
 
 if __name__ == '__main__':
     print("Welcome to EvlDaemon")
@@ -62,45 +109,11 @@ if __name__ == '__main__':
     resolved = socket.gethostbyname(host)
     connection = Connection(event_manager=event_manager, queue_group=queue_group, host=resolved, password=password)
 
-    for notifier in config.get('notifiers', []):
-        # Set up notifiers defined in configuration file
-        priority = Priority[notifier.get('priority', 'LOW').upper()]
-        name = notifier.get('name')
-
-        if notifier['type'] == 'console':
-            new_notifier = ConsoleNotifier(priority=priority, name=name)
-        elif notifier['type'] == 'sms':
-            layout = notifier.get('layout')
-            settings = notifier.get('settings')
-            sender = settings.get('sender')
-            recipient = settings.get('recipient')
-            sid = settings.get('sid')
-            auth_token = settings.get('authToken')
-            new_notifier = SmsNotifier(sid, auth_token, sender, recipient, priority, layout, name)
-        elif notifier['type'] == 'email':
-            layout = notifier.get('layout')
-            settings = notifier.get('settings')
-            sender = settings.get('sender')
-            recipient = settings.get('recipient')
-            api_key = settings.get('apiKey')
-            subject = settings.get('subject')
-            new_notifier = EmailNotifier(api_key, sender, recipient, priority, layout, subject, name)
-        else:
-            new_notifier = None
-
-        if new_notifier:
-            event_manager.add_notifier(new_notifier)
-
-    for storage in config.get('storage', []):
-        # Set up storage engines defined in configuration file
-        if storage['type'] == 'memory':
-            max_size = config.get('maxSize', DEFAULT_STORAGE_MAX_LENGTH)
-            new_storage = MemoryStorage(size=max_size)
-        else:
-            new_storage = None
-
-        if new_storage:
-            event_manager.add_storage(new_storage)
+    notifiers = load_notifiers(config.get('notifiers', []))
+    event_manager.add_notifiers(notifiers)
+    
+    storages = load_storage(config.get('storage', []))
+    event_manager.add_storages(storages)
 
     # Assign zone and partition names as read from configuration file.
     EventManager.zones = config.get('zones', {})
