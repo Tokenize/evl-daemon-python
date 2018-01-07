@@ -79,13 +79,11 @@ def load_storage(config: list):
             storages.append(new_storage)
     return storages
 
-
-if __name__ == '__main__':
-    print("Welcome to EvlDaemon")
-
-    p = argparse.ArgumentParser()
-    p.add_argument('-c', '--config', required=False, default="~/.evldaemon/config.json")
-    options = p.parse_args()
+def start():
+    """Start the main evl-daemon process"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config', required=False, default="~/.evldaemon/config.json")
+    options = parser.parse_args()
     config = read_config(options.config)
 
     if config is None:
@@ -107,11 +105,14 @@ if __name__ == '__main__':
     event_manager = EventManager(event_queue, queue_group)
 
     resolved = socket.gethostbyname(host)
-    connection = Connection(event_manager=event_manager, queue_group=queue_group, host=resolved, password=password)
+    connection = Connection(event_manager=event_manager,
+                            queue_group=queue_group,
+                            host=resolved,
+                            password=password)
 
     notifiers = load_notifiers(config.get('notifiers', []))
     event_manager.add_notifiers(notifiers)
-    
+
     storages = load_storage(config.get('storage', []))
     event_manager.add_storages(storages)
 
@@ -127,3 +128,8 @@ if __name__ == '__main__':
 
     connection.start()
     queue_group.join()
+
+
+if __name__ == '__main__':
+    print("Welcome to EvlDaemon")
+    start()
