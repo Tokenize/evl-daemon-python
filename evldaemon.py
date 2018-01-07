@@ -19,6 +19,12 @@ DEFAULT_STORAGE_MAX_LENGTH = 100
 
 
 def read_config(file: str) -> dict:
+    """
+    Reads configuration from given file path and returns dictionary of
+    configuration objects.
+    :param file: Configuration file path
+    :return: Dictionary of configuration objects
+    """
     file = os.path.expanduser(file)
 
     data = None
@@ -33,6 +39,10 @@ def read_config(file: str) -> dict:
     return data
 
 def load_notifiers(config: list):
+    """
+    Load notifiers from given list of notifier configurations
+    :param list: List of notifier configuration dicts
+    """
     notifiers = []
     for notifier in config:
         priority = Priority[notifier.get('priority', 'LOW').upper()]
@@ -65,6 +75,10 @@ def load_notifiers(config: list):
     return notifiers
 
 def load_storage(config: list):
+    """
+    Load storage engines from given list of storage configurations
+    :param list: List of storage engine configuration dicts
+    """
     storages = []
     for storage in config:
         kind = storage['type']
