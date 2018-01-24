@@ -32,6 +32,79 @@ class CommandType(Enum):
     FIRE_TROUBLE_ALARM_RESTORE = "843"
 
 
+class Priority(Enum):
+    LOW = 0
+    MEDIUM = 1
+    HIGH = 2
+    CRITICAL = 3
+
+    def __str__(self):
+        return self.name.title()
+
+
+NAMES = {
+    CommandType.POLL: "Poll",
+    CommandType.STATUS_REPORT: "Status Report",
+    CommandType.NETWORK_LOGIN: "Network Login",
+    CommandType.COMMAND_ACKNOWLEDGE: "Command Acknowledge",
+    CommandType.LOGIN: "Login",
+    CommandType.KEYPAD_LED_FLASH_STATE: "Keypad LED Flash State",
+    CommandType.KEYPAD_LED_STATE: "Keypad LED State",
+    CommandType.ZONE_ALARM: "Zone Alarm",
+    CommandType.ZONE_ALARM_RESTORE: "Zone Alarm Restore",
+    CommandType.ZONE_TAMPER: "Zone Tamper",
+    CommandType.ZONE_TAMPER_RESTORE: "Zone Tamper Restore",
+    CommandType.ZONE_FAULT: "Zone Fault",
+    CommandType.ZONE_FAULT_RESTORE: "Zone Fault Restore",
+    CommandType.ZONE_OPEN: "Zone Open",
+    CommandType.ZONE_RESTORED: "Zone Restored",
+    CommandType.PARTITION_READY: "Partition Ready",
+    CommandType.PARTITION_NOT_READY: "Partition Not Ready",
+    CommandType.PARTITION_ARMED: "Partition Armed",
+    CommandType.PARTITION_IN_ALARM: "Partition In Alarm",
+    CommandType.PARTITION_DISARMED: "Partition Disarmed",
+    CommandType.EXIT_DELAY_IN_PROGRESS: "Exit Delay in Progress",
+    CommandType.ENTRY_DELAY_IN_PROGRESS: "Entry Delay in Progress",
+    CommandType.PARTITION_IS_BUSY: "Partition is Busy",
+    CommandType.SPECIAL_CLOSING: "Special Closing",
+    CommandType.USER_OPENING: "User Opening",
+    CommandType.TROUBLE_LED_OFF: "Trouble LED Off",
+    CommandType.FIRE_TROUBLE_ALARM: "Fire Trouble Alarm",
+    CommandType.FIRE_TROUBLE_ALARM_RESTORE: "Fire Trouble Alarm Restore"
+}
+
+PRIORITIES = {
+    CommandType.POLL: Priority.LOW,
+    CommandType.STATUS_REPORT: Priority.LOW,
+    CommandType.NETWORK_LOGIN: Priority.LOW,
+    CommandType.COMMAND_ACKNOWLEDGE: Priority.LOW,
+    CommandType.LOGIN: Priority.LOW,
+    CommandType.KEYPAD_LED_FLASH_STATE: Priority.LOW,
+    CommandType.KEYPAD_LED_STATE: Priority.LOW,
+    CommandType.ZONE_ALARM: Priority.CRITICAL,
+    CommandType.ZONE_ALARM_RESTORE: Priority.LOW,
+    CommandType.ZONE_TAMPER: Priority.HIGH,
+    CommandType.ZONE_TAMPER_RESTORE: Priority.LOW,
+    CommandType.ZONE_FAULT: Priority.MEDIUM,
+    CommandType.ZONE_FAULT_RESTORE: Priority.LOW,
+    CommandType.ZONE_OPEN: Priority.LOW,
+    CommandType.ZONE_RESTORED: Priority.MEDIUM,
+    CommandType.PARTITION_READY: Priority.LOW,
+    CommandType.PARTITION_NOT_READY: Priority.LOW,
+    CommandType.PARTITION_ARMED: Priority.MEDIUM,
+    CommandType.PARTITION_IN_ALARM: Priority.CRITICAL,
+    CommandType.PARTITION_DISARMED: Priority.MEDIUM,
+    CommandType.EXIT_DELAY_IN_PROGRESS: Priority.MEDIUM,
+    CommandType.ENTRY_DELAY_IN_PROGRESS: Priority.MEDIUM,
+    CommandType.PARTITION_IS_BUSY: Priority.LOW,
+    CommandType.SPECIAL_CLOSING: Priority.LOW,
+    CommandType.USER_OPENING: Priority.LOW,
+    CommandType.TROUBLE_LED_OFF: Priority.LOW,
+    CommandType.FIRE_TROUBLE_ALARM: Priority.CRITICAL,
+    CommandType.FIRE_TROUBLE_ALARM_RESTORE: Priority.LOW,
+}
+
+
 class Command:
     def __init__(self, number: str):
         self.number = number

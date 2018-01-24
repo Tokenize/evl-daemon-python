@@ -3,7 +3,8 @@ from time import localtime, strftime
 from sendgrid import Email, SendGridAPIClient
 from sendgrid.helpers.mail import Content, Mail
 
-from evl.event import Event, Priority
+from evl.command import Priority
+from evl.event import Event
 
 
 class EmailNotifier:

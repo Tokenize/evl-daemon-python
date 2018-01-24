@@ -3,7 +3,8 @@ from time import localtime, strftime
 from twilio.base.exceptions import TwilioException
 from twilio.rest import Client
 
-from evl.event import Priority, Event
+from evl.command import Priority
+from evl.event import Event
 
 
 class SmsNotifier:

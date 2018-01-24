@@ -7,8 +7,9 @@ import gevent.pool
 import gevent.queue
 import gevent.signal
 
+from evl.command import Priority
 from evl.connection import Connection
-from evl.event import EventManager, Priority
+from evl.event import EventManager
 from evl.notifiers.consolenotifier import ConsoleNotifier
 from evl.notifiers.smsnotifier import SmsNotifier
 from evl.notifiers.emailnotifier import EmailNotifier

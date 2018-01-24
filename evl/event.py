@@ -1,82 +1,10 @@
 from enum import Enum
 import time
 
-from .command import Command, CommandType
+from evl import command as cmd
 from .data import (parse, LedState, LoginType, PartitionArmedType,
                    LOGIN_COMMANDS, PARTITION_COMMANDS, PARTITION_AND_ZONE_COMMANDS, ZONE_COMMANDS)
 
-
-class Priority(Enum):
-    LOW = 0
-    MEDIUM = 1
-    HIGH = 2
-    CRITICAL = 3
-
-    def __str__(self):
-        return self.name.title()
-
-
-COMMAND_NAMES = {
-    CommandType.POLL: "Poll",
-    CommandType.STATUS_REPORT: "Status Report",
-    CommandType.NETWORK_LOGIN: "Network Login",
-    CommandType.COMMAND_ACKNOWLEDGE: "Command Acknowledge",
-    CommandType.LOGIN: "Login",
-    CommandType.KEYPAD_LED_FLASH_STATE: "Keypad LED Flash State",
-    CommandType.KEYPAD_LED_STATE: "Keypad LED State",
-    CommandType.ZONE_ALARM: "Zone Alarm",
-    CommandType.ZONE_ALARM_RESTORE: "Zone Alarm Restore",
-    CommandType.ZONE_TAMPER: "Zone Tamper",
-    CommandType.ZONE_TAMPER_RESTORE: "Zone Tamper Restore",
-    CommandType.ZONE_FAULT: "Zone Fault",
-    CommandType.ZONE_FAULT_RESTORE: "Zone Fault Restore",
-    CommandType.ZONE_OPEN: "Zone Open",
-    CommandType.ZONE_RESTORED: "Zone Restored",
-    CommandType.PARTITION_READY: "Partition Ready",
-    CommandType.PARTITION_NOT_READY: "Partition Not Ready",
-    CommandType.PARTITION_ARMED: "Partition Armed",
-    CommandType.PARTITION_IN_ALARM: "Partition In Alarm",
-    CommandType.PARTITION_DISARMED: "Partition Disarmed",
-    CommandType.EXIT_DELAY_IN_PROGRESS: "Exit Delay in Progress",
-    CommandType.ENTRY_DELAY_IN_PROGRESS: "Entry Delay in Progress",
-    CommandType.PARTITION_IS_BUSY: "Partition is Busy",
-    CommandType.SPECIAL_CLOSING: "Special Closing",
-    CommandType.USER_OPENING: "User Opening",
-    CommandType.TROUBLE_LED_OFF: "Trouble LED Off",
-    CommandType.FIRE_TROUBLE_ALARM: "Fire Trouble Alarm",
-    CommandType.FIRE_TROUBLE_ALARM_RESTORE: "Fire Trouble Alarm Restore"
-}
-
-COMMAND_PRIORITIES = {
-    CommandType.POLL: Priority.LOW,
-    CommandType.STATUS_REPORT: Priority.LOW,
-    CommandType.NETWORK_LOGIN: Priority.LOW,
-    CommandType.COMMAND_ACKNOWLEDGE: Priority.LOW,
-    CommandType.LOGIN: Priority.LOW,
-    CommandType.KEYPAD_LED_FLASH_STATE: Priority.LOW,
-    CommandType.KEYPAD_LED_STATE: Priority.LOW,
-    CommandType.ZONE_ALARM: Priority.CRITICAL,
-    CommandType.ZONE_ALARM_RESTORE: Priority.LOW,
-    CommandType.ZONE_TAMPER: Priority.HIGH,
-    CommandType.ZONE_TAMPER_RESTORE: Priority.LOW,
-    CommandType.ZONE_FAULT: Priority.MEDIUM,
-    CommandType.ZONE_FAULT_RESTORE: Priority.LOW,
-    CommandType.ZONE_OPEN: Priority.LOW,
-    CommandType.ZONE_RESTORED: Priority.MEDIUM,
-    CommandType.PARTITION_READY: Priority.LOW,
-    CommandType.PARTITION_NOT_READY: Priority.LOW,
-    CommandType.PARTITION_ARMED: Priority.MEDIUM,
-    CommandType.PARTITION_IN_ALARM: Priority.CRITICAL,
-    CommandType.PARTITION_DISARMED: Priority.MEDIUM,
-    CommandType.EXIT_DELAY_IN_PROGRESS: Priority.MEDIUM,
-    CommandType.ENTRY_DELAY_IN_PROGRESS: Priority.MEDIUM,
-    CommandType.PARTITION_IS_BUSY: Priority.LOW,
-    CommandType.SPECIAL_CLOSING: Priority.LOW,
-    CommandType.USER_OPENING: Priority.LOW,
-    CommandType.TROUBLE_LED_OFF: Priority.LOW,
-    CommandType.FIRE_TROUBLE_ALARM: Priority.CRITICAL,
-    CommandType.FIRE_TROUBLE_ALARM_RESTORE: Priority.LOW,
-}
 
 LED_STATE_NAMES = {
     LedState.ARMED: "Armed",
@@ -110,7 +38,7 @@ class Event:
     priority, timestamp and string description of the event.
     """
 
-    def __init__(self, command: Command, data: dict, timestamp=None):
+    def __init__(self, command: cmd.Command, data: dict, timestamp=None):
         self.command = command
         self.description = ""
 
@@ -118,7 +46,7 @@ class Event:
         self.zone = data.get('zone', None)
         self.partition = data.get('partition', None)
 
-        self.priority = EventManager.priorities.get(command.command_type, Priority.LOW)
+        self.priority = EventManager.priorities.get(command.command_type, cmd.Priority.LOW)
 
         if timestamp is None:
             timestamp = int(time.time())
@@ -145,9 +73,9 @@ class EventManager:
     and dispatches events to its list of event notifiers.
     """
 
-    command_names = COMMAND_NAMES
+    command_names = cmd.NAMES
     login_names = LOGIN_TYPE_NAMES
-    priorities = COMMAND_PRIORITIES
+    priorities = cmd.PRIORITIES
 
     partitions = {}
     zones = {}
@@ -202,14 +130,14 @@ class EventManager:
                                                                    zone=event.zone_name())
         elif command_type in ZONE_COMMANDS:
             description = "{command}: {zone}".format(command=cmd_desc, zone=event.zone_name())
-        elif command_type in (CommandType.KEYPAD_LED_FLASH_STATE, CommandType.KEYPAD_LED_STATE):
+        elif command_type in (cmd.CommandType.KEYPAD_LED_FLASH_STATE, cmd.CommandType.KEYPAD_LED_STATE):
             led_state = self._describe_led_state(event.data)
             description = "{command}: {state}".format(command=cmd_desc, state=led_state)
         else:
             description = "{command}".format(command=cmd_desc)
         return description
 
-    def _describe_command(self, command: Command) -> str:
+    def _describe_command(self, command: cmd.Command) -> str:
         """
         Describes the given command.
         :param command: Command to describe
@@ -237,7 +165,7 @@ class EventManager:
         leds = [LedState(str(ind)).name.title() for ind, st in enumerate(bin_state) if st == "1"]
         return ", ".join(leds)
 
-    def enqueue(self, command: Command, data: str = ""):
+    def enqueue(self, command: cmd.Command, data: str = ""):
         self._event_queue.put((command, data))
 
     def wait(self):
