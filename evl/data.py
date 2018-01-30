@@ -1,35 +1,6 @@
 from enum import Enum
 
-from .command import Command, CommandType
-
-
-LOGIN_COMMANDS = {
-    CommandType.LOGIN
-}
-
-PARTITION_COMMANDS = {
-    CommandType.PARTITION_READY,
-    CommandType.PARTITION_NOT_READY,
-    CommandType.PARTITION_ARMED,
-    CommandType.PARTITION_IN_ALARM,
-    CommandType.PARTITION_DISARMED,
-    CommandType.EXIT_DELAY_IN_PROGRESS,
-    CommandType.ENTRY_DELAY_IN_PROGRESS,
-}
-
-PARTITION_AND_ZONE_COMMANDS = {
-    CommandType.ZONE_ALARM,
-    CommandType.ZONE_ALARM_RESTORE,
-    CommandType.ZONE_TAMPER,
-    CommandType.ZONE_TAMPER_RESTORE,
-}
-
-ZONE_COMMANDS = {
-    CommandType.ZONE_FAULT,
-    CommandType.ZONE_FAULT_RESTORE,
-    CommandType.ZONE_OPEN,
-    CommandType.ZONE_RESTORED
-}
+import evl.command as cmd
 
 
 class LedState(Enum):
@@ -56,21 +27,46 @@ class PartitionArmedType(Enum):
     ZERO_ENTRY_AWAY = "2"
     ZERO_ENTRY_STAY = "3"
 
+LED_STATE_NAMES = {
+    LedState.ARMED: "Armed",
+    LedState.BACKLIGHT: "Backlight",
+    LedState.BYPASS: "Bypass",
+    LedState.FIRE: "Fire",
+    LedState.MEMORY: "Memory",
+    LedState.PROGRAM: "Program",
+    LedState.READY: "Ready",
+    LedState.TROUBLE: "Trouble"
+}
 
-def parse(command: Command, data: str) -> dict:
+LOGIN_TYPE_NAMES = {
+    LoginType.INCORRECT_PASSWORD: "Incorrect Password",
+    LoginType.LOGIN_SUCCESSFUL: "Login Successful",
+    LoginType.PASSWORD_REQUEST: "Password Request",
+    LoginType.TIME_OUT: "Login Timeout"
+}
+
+PARTITION_ARMED_NAMES = {
+    PartitionArmedType.AWAY: "Away",
+    PartitionArmedType.STAY: "Stay",
+    PartitionArmedType.ZERO_ENTRY_AWAY: "Zero Entry Away",
+    PartitionArmedType.ZERO_ENTRY_STAY: "Zero Entry Stay"
+}
+
+
+def parse(command: cmd.Command, data: str) -> dict:
     parsed = {}
     command_type = command.command_type
 
     parsed['data'] = data
-    if command_type in ZONE_COMMANDS:
+    if command_type in cmd.ZONE_COMMANDS:
         # Zone commands always have zone as first 3 chars
         parsed['zone'] = data[0:3]
 
-    if command_type in PARTITION_COMMANDS:
+    if command_type in cmd.PARTITION_COMMANDS:
         # Partition commands always have partition as first char
         parsed['partition'] = data[:1]
 
-    if command_type in PARTITION_AND_ZONE_COMMANDS:
+    if command_type in cmd.PARTITION_AND_ZONE_COMMANDS:
         parsed['partition'] = data[:1]
         parsed['zone'] = data[1:4]
 

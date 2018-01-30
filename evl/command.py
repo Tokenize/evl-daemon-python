@@ -1,6 +1,21 @@
 from enum import Enum
 
 
+class Command:
+    def __init__(self, number: str):
+        self.number = number
+
+        try:
+            self.command_type = CommandType(number)
+        except ValueError:
+            self.command_type = None
+
+    def __str__(self):
+        if self.command_type is None:
+            return "<Unknown: {type}>".format(type=self.number)
+        return self.command_type.name
+
+
 class CommandType(Enum):
     POLL = "000"
     STATUS_REPORT = "001"
@@ -104,17 +119,31 @@ PRIORITIES = {
     CommandType.FIRE_TROUBLE_ALARM_RESTORE: Priority.LOW,
 }
 
+LOGIN_COMMANDS = {
+    CommandType.LOGIN
+}
 
-class Command:
-    def __init__(self, number: str):
-        self.number = number
+PARTITION_COMMANDS = {
+    CommandType.PARTITION_READY,
+    CommandType.PARTITION_NOT_READY,
+    CommandType.PARTITION_ARMED,
+    CommandType.PARTITION_IN_ALARM,
+    CommandType.PARTITION_DISARMED,
+    CommandType.EXIT_DELAY_IN_PROGRESS,
+    CommandType.ENTRY_DELAY_IN_PROGRESS,
+}
 
-        try:
-            self.command_type = CommandType(number)
-        except ValueError:
-            self.command_type = None
+PARTITION_AND_ZONE_COMMANDS = {
+    CommandType.ZONE_ALARM,
+    CommandType.ZONE_ALARM_RESTORE,
+    CommandType.ZONE_TAMPER,
+    CommandType.ZONE_TAMPER_RESTORE,
+}
 
-    def __str__(self):
-        if self.command_type is None:
-            return "<Unknown: {type}>".format(type=self.number)
-        return self.command_type.name
+ZONE_COMMANDS = {
+    CommandType.ZONE_FAULT,
+    CommandType.ZONE_FAULT_RESTORE,
+    CommandType.ZONE_OPEN,
+    CommandType.ZONE_RESTORED
+}
+

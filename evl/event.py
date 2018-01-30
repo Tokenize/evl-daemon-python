@@ -1,35 +1,7 @@
-from enum import Enum
 import time
 
-from evl import command as cmd
-from .data import (parse, LedState, LoginType, PartitionArmedType,
-                   LOGIN_COMMANDS, PARTITION_COMMANDS, PARTITION_AND_ZONE_COMMANDS, ZONE_COMMANDS)
-
-
-LED_STATE_NAMES = {
-    LedState.ARMED: "Armed",
-    LedState.BACKLIGHT: "Backlight",
-    LedState.BYPASS: "Bypass",
-    LedState.FIRE: "Fire",
-    LedState.MEMORY: "Memory",
-    LedState.PROGRAM: "Program",
-    LedState.READY: "Ready",
-    LedState.TROUBLE: "Trouble"
-}
-
-LOGIN_TYPE_NAMES = {
-    LoginType.INCORRECT_PASSWORD: "Incorrect Password",
-    LoginType.LOGIN_SUCCESSFUL: "Login Successful",
-    LoginType.PASSWORD_REQUEST: "Password Request",
-    LoginType.TIME_OUT: "Login Timeout"
-}
-
-PARTITION_ARMED_NAMES = {
-    PartitionArmedType.AWAY: "Away",
-    PartitionArmedType.STAY: "Stay",
-    PartitionArmedType.ZERO_ENTRY_AWAY: "Zero Entry Away",
-    PartitionArmedType.ZERO_ENTRY_STAY: "Zero Entry Stay"
-}
+import evl.command as cmd
+import evl.data as dt
 
 
 class Event:
@@ -46,7 +18,7 @@ class Event:
         self.zone = data.get('zone', None)
         self.partition = data.get('partition', None)
 
-        self.priority = EventManager.priorities.get(command.command_type, cmd.Priority.LOW)
+        self.priority = cmd.PRIORITIES.get(command.command_type, cmd.Priority.LOW)
 
         if timestamp is None:
             timestamp = int(time.time())
@@ -72,10 +44,6 @@ class EventManager:
     Represents an event manager that waits for incoming events from an event queue
     and dispatches events to its list of event notifiers.
     """
-
-    command_names = cmd.NAMES
-    login_names = LOGIN_TYPE_NAMES
-    priorities = cmd.PRIORITIES
 
     partitions = {}
     zones = {}
@@ -118,17 +86,17 @@ class EventManager:
         """
         cmd_desc = self._describe_command(event.command)
         command_type = event.command.command_type
-        if command_type in LOGIN_COMMANDS:
-            login_type = LoginType(event.data)
+        if command_type in cmd.LOGIN_COMMANDS:
+            login_type = dt.LoginType(event.data)
             description = "{command}: {login}".format(command=cmd_desc,
-                                                      login=EventManager.login_names[login_type])
-        elif command_type in PARTITION_COMMANDS:
+                                                      login=dt.LOGIN_TYPE_NAMES[login_type])
+        elif command_type in cmd.PARTITION_COMMANDS:
             description = "{command}: [{partition}]".format(command=cmd_desc, partition=event.partition_name())
-        elif command_type in PARTITION_AND_ZONE_COMMANDS:
+        elif command_type in cmd.PARTITION_AND_ZONE_COMMANDS:
             description = "{command}: [{partition}] {zone}".format(command=cmd_desc,
                                                                    partition=event.partition_name(),
                                                                    zone=event.zone_name())
-        elif command_type in ZONE_COMMANDS:
+        elif command_type in cmd.ZONE_COMMANDS:
             description = "{command}: {zone}".format(command=cmd_desc, zone=event.zone_name())
         elif command_type in (cmd.CommandType.KEYPAD_LED_FLASH_STATE, cmd.CommandType.KEYPAD_LED_STATE):
             led_state = self._describe_led_state(event.data)
@@ -143,7 +111,7 @@ class EventManager:
         :param command: Command to describe
         :return: Description of command
         """
-        name = EventManager.command_names.get(command.command_type)
+        name = cmd.NAMES.get(command.command_type)
         if name is None:
             name = "<Unknown: [{command}]>".format(command=command.number)
         return name
@@ -162,7 +130,7 @@ class EventManager:
         state_width = 8
 
         bin_state = bin(int(state, state_base))[2:].zfill(state_width)
-        leds = [LedState(str(ind)).name.title() for ind, st in enumerate(bin_state) if st == "1"]
+        leds = [dt.LedState(str(ind)).name.title() for ind, st in enumerate(bin_state) if st == "1"]
         return ", ".join(leds)
 
     def enqueue(self, command: cmd.Command, data: str = ""):
@@ -172,7 +140,7 @@ class EventManager:
         """Initiate wait for incoming events in event queue."""
         while True:
             (command, data) = self._event_queue.get()
-            parsed_data = parse(command, data)
+            parsed_data = dt.parse(command, data)
             timestamp = int(time.time())
             event = Event(command, parsed_data, timestamp)
             event.description = self._describe(event)
