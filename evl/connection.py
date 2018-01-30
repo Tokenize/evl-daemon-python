@@ -2,10 +2,10 @@ import gevent.pool
 import gevent.queue
 from gevent import socket
 
-from . import tpi
-from .command import Command, CommandType
-from .data import LoginType
-from .event import EventManager
+import evl.tpi as tpi
+import evl.command as cmd
+import evl.data as dt
+import evl.event as ev
 
 
 class Connection:
@@ -13,7 +13,7 @@ class Connection:
     Represents a connection to an EVL device. Responsible for connecting to the EVL,
     sending and receiving data, and processing incoming commands as appropriate.
     """
-    def __init__(self, event_manager: EventManager, queue_group: gevent.pool.Group, host: str, port: int=4025, password: str=""):
+    def __init__(self, event_manager: ev.EventManager, queue_group: gevent.pool.Group, host: str, port: int=4025, password: str=""):
         self.host = host
         self.port = port
         self.password = password
@@ -96,12 +96,12 @@ class Connection:
         while True:
             event = self._recv_queue.get()
 
-            command = Command(tpi.parse_command(event))
+            command = cmd.Command(tpi.parse_command(event))
             data = tpi.parse_data(event)
-            if command.command_type == CommandType.LOGIN and LoginType(data) == LoginType.PASSWORD_REQUEST:
+            if command.command_type == cmd.CommandType.LOGIN and dt.LoginType(data) == dt.LoginType.PASSWORD_REQUEST:
                 print("Logging in...")
-                self.send(CommandType.NETWORK_LOGIN, self.password)
-            elif command.command_type == CommandType.COMMAND_ACKNOWLEDGE:
+                self.send(cmd.CommandType.NETWORK_LOGIN, self.password)
+            elif command.command_type == cmd.CommandType.COMMAND_ACKNOWLEDGE:
                 self._ack_queue.put(event)
             else:
                 self._event_manager.enqueue(command, data)
@@ -111,7 +111,7 @@ class Connection:
         if self._conn is not None:
             self._conn.close()
 
-    def send(self, command: CommandType, data: str= ""):
+    def send(self, command: cmd.CommandType, data: str= ""):
         """
         Send the given command and data to the EVL device.
         :param command: CommandType to send
