@@ -34,9 +34,9 @@ class EvlDaemon:
     def start(self):
         resolved = socket.gethostbyname(host)
         connection = conn.Connection(event_manager=self.event_manager,
-                                queue_group=self.queue_group,
-                                host=resolved,
-                                password=password)
+                                     queue_group=self.queue_group,
+                                     host=resolved,
+                                     password=password)
 
         # Assign zone and partition names as read from configuration file.
         ev.EventManager.zones = config.get('zones', {})
@@ -79,4 +79,3 @@ if __name__ == '__main__':
 
     ed = EvlDaemon(host, password, port, config)
     ed.start()
-
