@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 import evl.command as cmd
@@ -9,6 +10,8 @@ import evl.storage.memory as memory
 
 
 DEFAULT_STORAGE_MAX_LENGTH = 100
+
+logger = logging.getLogger(__name__)
 
 
 def load_notifiers(config: list) -> list:
@@ -84,8 +87,8 @@ def read(file: str) -> dict:
         with open(file) as json_data:
             data = json.load(json_data)
     except FileNotFoundError:
-        print("Configuration file '{file}' not found!".format(file=file))
+        logger.critical("Configuration file '{file}' not found!".format(file=file))
     except json.JSONDecodeError:
-        print("Invalid configuration file '{file}'!".format(file=file))
+        logger.critical("Invalid configuration file '{file}'!".format(file=file))
 
     return data

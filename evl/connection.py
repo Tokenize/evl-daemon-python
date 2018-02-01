@@ -1,19 +1,26 @@
 import gevent.pool
 import gevent.queue
 from gevent import socket
+import logging
 
 import evl.tpi as tpi
 import evl.command as cmd
 import evl.data as dt
 import evl.event as ev
 
+logger = logging.getLogger(__name__)
+
 
 class Connection:
     """
-    Represents a connection to an EVL device. Responsible for connecting to the EVL,
-    sending and receiving data, and processing incoming commands as appropriate.
+    Represents a connection to an EVL device. Responsible for connecting to the
+    EVL, sending and receiving data, and processing incoming commands as
+    appropriate.
     """
-    def __init__(self, event_manager: ev.EventManager, queue_group: gevent.pool.Group, host: str, port: int=4025, password: str=""):
+    def __init__(self, event_manager: ev.EventManager,
+                 queue_group: gevent.pool.Group, host: str, port: int=4025,
+                 password: str=""):
+
         self.host = host
         self.port = port
         self.password = password
@@ -40,7 +47,7 @@ class Connection:
 
     def _connect(self):
         """Initiates connection to the EVL device."""
-        print("Connecting to EVL...")
+        logger.info("Connecting to EVL...")
         self._conn = socket.create_connection((self.host, self.port))
 
     def _receive(self):
@@ -72,7 +79,7 @@ class Connection:
             for e in events:
                 self._recv_queue.put(e)
 
-        print("Disconnected!")
+        logger.warning("Disconnected!")
         self.stop()
 
     def _send(self):
@@ -87,19 +94,22 @@ class Connection:
             try:
                 ack = self._ack_queue.get(timeout=2)
                 if tpi.parse_data(ack) != tpi.parse_command(packet):
-                    print("Incorrect acknowledgement!")
+                    logger.error("Incorrect acknowledgement!")
             except gevent.queue.Empty:
-                print("Timeout waiting for acknowledgement!")
+                logger.error("Timeout waiting for acknowledgement!")
 
     def _process(self):
-        """Processing loop that receives incoming commands and processes as necessary."""
+        """
+        Processing loop that receives incoming commands and processes as
+        necessary.
+        """
         while True:
             event = self._recv_queue.get()
 
             command = cmd.Command(tpi.parse_command(event))
             data = tpi.parse_data(event)
             if command.command_type == cmd.CommandType.LOGIN and dt.LoginType(data) == dt.LoginType.PASSWORD_REQUEST:
-                print("Logging in...")
+                logger.info("Logging in...")
                 self.send(cmd.CommandType.NETWORK_LOGIN, self.password)
             elif command.command_type == cmd.CommandType.COMMAND_ACKNOWLEDGE:
                 self._ack_queue.put(event)
@@ -119,5 +129,8 @@ class Connection:
         """
         command_str = command.value
         checksum = tpi.calculate_checksum(command_str + data)
-        packet = "{command}{data}{checksum}\r\n".format(command=command_str, data=data, checksum=checksum)
+        packet = "{command}{data}{checksum}\r\n".format(
+            command=command_str,
+            data=data,
+            checksum=checksum)
         self._send_queue.put(packet)
