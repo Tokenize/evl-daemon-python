@@ -84,7 +84,7 @@ class EventManager:
         :param event: Event to describe
         :return: Description of event
         """
-        cmd_desc = self._describe_command(event.command)
+        cmd_desc = event.command.describe()
         command_type = event.command.command_type
         if command_type in cmd.LOGIN_COMMANDS:
             login_type = dt.LoginType(event.data)
@@ -104,17 +104,6 @@ class EventManager:
         else:
             description = "{command}".format(command=cmd_desc)
         return description
-
-    def _describe_command(self, command: cmd.Command) -> str:
-        """
-        Describes the given command.
-        :param command: Command to describe
-        :return: Description of command
-        """
-        name = cmd.NAMES.get(command.command_type)
-        if name is None:
-            name = "<Unknown: [{command}]>".format(command=command.number)
-        return name
 
     def _describe_led_state(self, state: str) -> str:
         """
