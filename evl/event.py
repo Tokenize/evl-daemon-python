@@ -12,7 +12,6 @@ class Event:
 
     def __init__(self, command: cmd.Command, data: dict, timestamp=None):
         self.command = command
-        self.description = ""
 
         self.data = data.get('data', None)
         self.zone = data.get('zone', None)
@@ -27,7 +26,8 @@ class Event:
     def zone_name(self) -> str:
         if self.zone is None:
             return ""
-        return EventManager.zones.get(self.zone, "Zone {zone}".format(zone=self.zone))
+        return EventManager.zones.get(self.zone, "Zone {zone}".format(
+            zone=self.zone))
 
     def partition_name(self) -> str:
         if self.partition is None:
@@ -35,8 +35,44 @@ class Event:
         return EventManager.partitions.get(self.partition,
                                            "Partition {partition}".format(partition=self.partition))
 
+    def describe(self) -> str:
+        """
+        Describes the event based on its command and data.
+        :return: Description of event
+        """
+        cmd_desc = self.command.describe()
+        command_type = self.command.command_type
+
+        if command_type in cmd.LOGIN_COMMANDS:
+            login_type = dt.LoginType(self.data)
+            description = "{command}: {login}".format(
+                command=cmd_desc,
+                login=dt.LOGIN_TYPE_NAMES[login_type])
+        elif command_type in cmd.PARTITION_COMMANDS:
+            description = "{command}: [{partition}]".format(
+                command=cmd_desc,
+                partition=self.partition_name())
+        elif command_type in cmd.PARTITION_AND_ZONE_COMMANDS:
+            description = "{command}: [{partition}] {zone}".format(
+                command=cmd_desc,
+                partition=self.partition_name(),
+                zone=self.zone_name())
+        elif command_type in cmd.ZONE_COMMANDS:
+            description = "{command}: {zone}".format(
+                command=cmd_desc,
+                zone=self.zone_name())
+        elif command_type in (cmd.CommandType.KEYPAD_LED_FLASH_STATE, cmd.CommandType.KEYPAD_LED_STATE):
+            led_state = dt.describe_led_state(self.data)
+            description = "{command}: {state}".format(
+                command=cmd_desc,
+                state=led_state)
+        else:
+            description = "{command}".format(command=cmd_desc)
+
+        return description
+
     def __str__(self) -> str:
-        return self.description
+        return self.describe()
 
 
 class EventManager:
@@ -78,33 +114,6 @@ class EventManager:
         """
         self._storage.extend(storages)
 
-    def _describe(self, event: Event) -> str:
-        """
-        Describes the given event based on the event's command and data.
-        :param event: Event to describe
-        :return: Description of event
-        """
-        cmd_desc = event.command.describe()
-        command_type = event.command.command_type
-        if command_type in cmd.LOGIN_COMMANDS:
-            login_type = dt.LoginType(event.data)
-            description = "{command}: {login}".format(command=cmd_desc,
-                                                      login=dt.LOGIN_TYPE_NAMES[login_type])
-        elif command_type in cmd.PARTITION_COMMANDS:
-            description = "{command}: [{partition}]".format(command=cmd_desc, partition=event.partition_name())
-        elif command_type in cmd.PARTITION_AND_ZONE_COMMANDS:
-            description = "{command}: [{partition}] {zone}".format(command=cmd_desc,
-                                                                   partition=event.partition_name(),
-                                                                   zone=event.zone_name())
-        elif command_type in cmd.ZONE_COMMANDS:
-            description = "{command}: {zone}".format(command=cmd_desc, zone=event.zone_name())
-        elif command_type in (cmd.CommandType.KEYPAD_LED_FLASH_STATE, cmd.CommandType.KEYPAD_LED_STATE):
-            led_state = dt.describe_led_state(event.data)
-            description = "{command}: {state}".format(command=cmd_desc, state=led_state)
-        else:
-            description = "{command}".format(command=cmd_desc)
-        return description
-
     def enqueue(self, command: cmd.Command, data: str = ""):
         self._event_queue.put((command, data))
 
@@ -115,7 +124,6 @@ class EventManager:
             parsed_data = dt.parse(command, data)
             timestamp = int(time.time())
             event = Event(command, parsed_data, timestamp)
-            event.description = self._describe(event)
 
             for storage in self._storage:
                 storage.store(event)
