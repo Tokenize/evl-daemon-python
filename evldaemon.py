@@ -32,15 +32,15 @@ class EvlDaemon:
         self.event_manager.add_storages(self.storage)
 
     def start(self):
-        resolved = socket.gethostbyname(host)
+        resolved = socket.gethostbyname(self.host)
         connection = conn.Connection(event_manager=self.event_manager,
                                      queue_group=self.queue_group,
                                      host=resolved,
-                                     password=password)
+                                     password=self.password)
 
         # Assign zone and partition names as read from configuration file.
-        ev.EventManager.zones = config.get('zones', {})
-        ev.EventManager.partitions = config.get('partitions', {})
+        ev.EventManager.zones = self.config.get('zones', {})
+        ev.EventManager.partitions = self.config.get('partitions', {})
 
         # TODO: Read command name, priority, login name, etc. overrides from config.
 
