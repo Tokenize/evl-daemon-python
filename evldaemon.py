@@ -27,6 +27,12 @@ class EvlDaemon:
         self.queue_group = gevent.pool.Group()
         self.event_queue = gevent.queue.Queue()
 
+        # Assign zone and partition names as read from configuration file.
+        ev.EventManager.zones = self.config.get('zones', {})
+        ev.EventManager.partitions = self.config.get('partitions', {})
+
+        # TODO: Read command name, priority, login name, etc. overrides from config.
+
         self.event_manager = ev.EventManager(self.event_queue, self.queue_group)
         self.event_manager.add_notifiers(self.notifiers)
         self.event_manager.add_storages(self.storage)
@@ -37,12 +43,6 @@ class EvlDaemon:
                                      queue_group=self.queue_group,
                                      host=resolved,
                                      password=self.password)
-
-        # Assign zone and partition names as read from configuration file.
-        ev.EventManager.zones = self.config.get('zones', {})
-        ev.EventManager.partitions = self.config.get('partitions', {})
-
-        # TODO: Read command name, priority, login name, etc. overrides from config.
 
         # Are multiple signal handlers possible?
         gevent.signal(signal.SIGINT, connection.stop)
