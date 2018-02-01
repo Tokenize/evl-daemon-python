@@ -27,6 +27,7 @@ class PartitionArmedType(Enum):
     ZERO_ENTRY_AWAY = "2"
     ZERO_ENTRY_STAY = "3"
 
+
 LED_STATE_NAMES = {
     LedState.ARMED: "Armed",
     LedState.BACKLIGHT: "Backlight",
