@@ -74,7 +74,7 @@ class EventManager:
     def add_storages(self, storages: list):
         """
         Adds an event storage engine
-        :param storage: Storage engine to add to storage list
+        :param storages: Storage engine to add to storage list
         """
         self._storage.extend(storages)
 
@@ -99,28 +99,11 @@ class EventManager:
         elif command_type in cmd.ZONE_COMMANDS:
             description = "{command}: {zone}".format(command=cmd_desc, zone=event.zone_name())
         elif command_type in (cmd.CommandType.KEYPAD_LED_FLASH_STATE, cmd.CommandType.KEYPAD_LED_STATE):
-            led_state = self._describe_led_state(event.data)
+            led_state = dt.describe_led_state(event.data)
             description = "{command}: {state}".format(command=cmd_desc, state=led_state)
         else:
             description = "{command}".format(command=cmd_desc)
         return description
-
-    def _describe_led_state(self, state: str) -> str:
-        """
-        Describes the given hex value LED state.
-
-        Converts the given hex value to a string of bits representing the LED
-        states and returns the enabled LEDs in a comma-separated string. Details
-        about LED state can be found in the EnvisaLink TPI documentation.
-        :param state: Hex value of LED state
-        :return: Comma-separated string of enabled LEDs
-        """
-        state_base = 16
-        state_width = 8
-
-        bin_state = bin(int(state, state_base))[2:].zfill(state_width)
-        leds = [dt.LedState(str(ind)).name.title() for ind, st in enumerate(bin_state) if st == "1"]
-        return ", ".join(leds)
 
     def enqueue(self, command: cmd.Command, data: str = ""):
         self._event_queue.put((command, data))
