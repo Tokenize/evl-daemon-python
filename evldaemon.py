@@ -52,9 +52,8 @@ class EvlDaemon:
         self.queue_group.join()
 
 
-if __name__ == '__main__':
-    print("Welcome to EvlDaemon")
-
+def main():
+    print("Welcome to EvlDaemon.")
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', required=False,
                         default="~/.evldaemon/config.json")
@@ -79,3 +78,8 @@ if __name__ == '__main__':
 
     ed = EvlDaemon(host, password, port, config)
     ed.start()
+
+
+if __name__ == '__main__':
+    main()
+
