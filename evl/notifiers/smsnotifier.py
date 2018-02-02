@@ -1,3 +1,4 @@
+import logging
 from time import localtime, strftime
 
 from twilio.base.exceptions import TwilioException
@@ -6,11 +7,14 @@ from twilio.rest import Client
 from evl.command import Priority
 from evl.event import Event
 
+logger = logging.getLogger(__name__)
+
 
 class SmsNotifier:
 
     def __init__(self, sid: str, auth_token: str, sender: str, recipient: str,
-                 priority: Priority=Priority.CRITICAL, layout: str=None, name: str=None):
+                 priority: Priority=Priority.CRITICAL, layout: str=None,
+                 name: str=None):
 
         self.sid = sid
         self.auth_token = auth_token
@@ -33,7 +37,6 @@ class SmsNotifier:
     def __str__(self):
         return self.name
 
-
     def notify(self, event: Event):
         timestamp = strftime(self.timestamp_format, localtime(event.timestamp))
 
@@ -47,4 +50,4 @@ class SmsNotifier:
         try:
             self.client.messages.create(self.recipient, body=message, from_=self.sender)
         except TwilioException as e:
-            print("ERROR: Unable to send SMS! ({exception})".format(exception=e))
+            logger.error("Unable to send SMS! ({exception})".format(exception=e))

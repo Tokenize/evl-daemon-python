@@ -1,7 +1,10 @@
+import logging
 import time
 
 import evl.command as cmd
 import evl.data as dt
+
+logger = logging.getLogger(__name__)
 
 
 class Event:
@@ -132,5 +135,5 @@ class EventManager:
                 try:
                     notifier.notify(event)
                 except Exception as e:
-                    # TODO: Implement better error handling/logging
-                    print("Error notifying on {name}: {exception}".format(name=notifier, exception=e))
+                    logger.error("Error notifying on {name}: {exception}".format(
+                        name=notifier, exception=e))
