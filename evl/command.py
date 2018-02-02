@@ -11,9 +11,17 @@ class Command:
             self.command_type = None
 
     def __str__(self):
-        if self.command_type is None:
-            return "<Unknown: {type}>".format(type=self.number)
-        return self.command_type.name
+        return self.describe()
+
+    def describe(self) -> str:
+        """
+        Describes the given command.
+        :return: Description of command
+        """
+        name = NAMES.get(self.command_type)
+        if name is None:
+            name = "<Unknown: [{command}]>".format(command=self.number)
+        return name
 
 
 class CommandType(Enum):

@@ -1,3 +1,4 @@
+import logging
 from time import localtime, strftime
 
 from sendgrid import Email, SendGridAPIClient
@@ -6,10 +7,14 @@ from sendgrid.helpers.mail import Content, Mail
 from evl.command import Priority
 from evl.event import Event
 
+logger = logging.getLogger(__name__)
+
 
 class EmailNotifier:
     def __init__(self, api_key: str, sender: str, recipient: str,
-                 priority: Priority=Priority.CRITICAL, layout: str=None, subject: str=None, name: str=None):
+                 priority: Priority=Priority.CRITICAL, layout: str=None,
+                 subject: str=None, name: str=None):
+
         self.api_key = api_key
         self.sender = Email(sender)
         self.recipient = Email(recipient)
@@ -40,11 +45,13 @@ class EmailNotifier:
             self._send_email(event, timestamp)
 
     def _send_email(self, event: Event, timestamp):
-        message = self.layout.format(timestamp=timestamp, priority=event.priority, event=event)
+        message = self.layout.format(timestamp=timestamp,
+                                     priority=event.priority,
+                                     event=event)
         body = Content(type_="text/plain", value=message)
         mail = Mail(self.sender, self.subject, self.recipient, body)
         response = self.client.client.mail.send.post(request_body=mail.get())
 
         if response.status_code not in (200, 202):
-            print("ERROR: Unable to send email! ({status_code} - {message})".format(status_code=response.status_code,
-                                                                                    message=response.body))
+            logger.error("Unable to send email! ({status_code} - {message})".format(
+                status_code=response.status_code, message=response.body))
