@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import sys
 
 import evl.command as cmd
 import evl.notifiers.consolenotifier as console
@@ -12,6 +13,39 @@ import evl.storage.memory as memory
 DEFAULT_STORAGE_MAX_LENGTH = 100
 
 logger = logging.getLogger(__name__)
+
+
+def load_logging(config: list) -> dict:
+    """
+    Loads logging configuration from config file and returns a dictionary
+    following the logging configuration dictionary schema.
+    :param config: Logging configuration list from config file
+    :return dict: Logging configuration dictionary
+    """
+
+    log_config = {'version': 1, 'handlers': {}, 'loggers': {},
+                  'root': {'level': logging.NOTSET}}
+
+    handlers = []
+    for new_logger in config:
+        priority = new_logger.get('level', 'INFO')
+        name = new_logger['name']
+        kind = new_logger['type']
+
+        if kind == 'console':
+            log_config['handlers'][name] = {
+                'class': 'logging.StreamHandler',
+                'level': priority,
+                'stream': sys.stderr
+            }
+            handlers.append(name)
+
+    if handlers:
+        log_config['loggers']['evl'] = {
+            'handlers': handlers
+        }
+
+    return log_config
 
 
 def load_notifiers(config: list) -> list:

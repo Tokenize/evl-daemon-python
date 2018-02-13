@@ -4,10 +4,15 @@ import signal
 import gevent.pool
 import gevent.queue
 import gevent.signal
+import logging
+import logging.config
 
 import evl.connection as conn
 import evl.event as ev
 import evl.config as conf
+
+
+logger = logging.getLogger('evl')
 
 
 class EvlDaemon:
@@ -38,6 +43,7 @@ class EvlDaemon:
         self.event_manager.add_storages(self.storage)
 
     def start(self):
+        logger.debug("Starting daemon...")
         resolved = socket.gethostbyname(self.host)
         connection = conn.Connection(event_manager=self.event_manager,
                                      queue_group=self.queue_group,
@@ -63,6 +69,9 @@ def main():
     if config is None:
         print("Unable to read configuration file. Exiting.")
         exit(1)
+
+    logging_config = conf.load_logging(config.get('logging', []))
+    logging.config.dictConfig(logging_config)
 
     host = config.get('ip')
     if host is None:

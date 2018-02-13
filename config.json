@@ -18,6 +18,14 @@
         "1": "Main"
     },
 
+    "logging": [
+        {
+            "name": "console",
+            "type": "console",
+            "level": "DEBUG"
+        }
+    ],
+
     "storage": [
         {
             "name": "memory",

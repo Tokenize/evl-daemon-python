@@ -47,7 +47,7 @@ class Connection:
 
     def _connect(self):
         """Initiates connection to the EVL device."""
-        logger.info("Connecting to EVL...")
+        logger.debug("Connecting to EVL...")
         self._conn = socket.create_connection((self.host, self.port))
 
     def _receive(self):
@@ -109,7 +109,7 @@ class Connection:
             command = cmd.Command(tpi.parse_command(event))
             data = tpi.parse_data(event)
             if command.command_type == cmd.CommandType.LOGIN and dt.LoginType(data) == dt.LoginType.PASSWORD_REQUEST:
-                logger.info("Logging in...")
+                logger.debug("Logging in...")
                 self.send(cmd.CommandType.NETWORK_LOGIN, self.password)
             elif command.command_type == cmd.CommandType.COMMAND_ACKNOWLEDGE:
                 self._ack_queue.put(event)
