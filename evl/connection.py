@@ -106,6 +106,10 @@ class Connection:
         while True:
             event = self._recv_queue.get()
 
+            if not tpi.validate_checksum(event):
+                logger.error("Invalid checksum detected on incoming data!")
+                continue
+
             command = cmd.Command(tpi.parse_command(event))
             data = tpi.parse_data(event)
             if command.command_type == cmd.CommandType.LOGIN and dt.LoginType(data) == dt.LoginType.PASSWORD_REQUEST:
