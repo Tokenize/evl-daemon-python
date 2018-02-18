@@ -1,6 +1,8 @@
 import logging
 import time
 
+from datetime import datetime
+
 import evl.command as cmd
 import evl.data as dt
 
@@ -78,6 +80,37 @@ class Event:
         return self.describe()
 
 
+class Status:
+    """
+    Represents the current status of the device, partitions, zones, connection, etc.
+    """
+
+    def __init__(self):
+        self.started_at = datetime.now()
+        self.notifiers = []
+        self.storage = []
+        self.listeners = []
+
+        self.last_event = None
+
+        self.connection = {'hostname': '', 'port': 0}
+
+    def update(self, event: Event):
+        self.last_event = event
+
+    def report(self) -> dict:
+        uptime = datetime.now() - self.started_at
+
+        return {
+            'uptime': uptime.total_seconds(),
+            'notifiers': self.notifiers,
+            'storage': self.storage,
+            'listeners': self.listeners,
+            'connection': self.connection,
+            'last_event': self.last_event
+        }
+
+
 class EventManager:
     """
     Represents an event manager that waits for incoming events from an event queue
@@ -87,7 +120,7 @@ class EventManager:
     partitions = {}
     zones = {}
 
-    def __init__(self, event_queue, queue_group=None, notifiers: list=None, storage: list=None):
+    def __init__(self, event_queue, queue_group=None, notifiers: list=None, storage: list=None, status: Status=None):
 
         if notifiers is None:
             notifiers = []
@@ -96,6 +129,13 @@ class EventManager:
         if storage is None:
             storage = []
         self._storage = storage
+
+        if status is None:
+            status = Status()
+
+        self.status = status
+        self.status.notifiers = self._notifiers
+        self.status.storage = self._storage
 
         self._event_queue = event_queue
 
@@ -127,6 +167,8 @@ class EventManager:
             parsed_data = dt.parse(command, data)
             timestamp = int(time.time())
             event = Event(command, parsed_data, timestamp)
+
+            self.status.update(event)
 
             for storage in self._storage:
                 storage.store(event)
