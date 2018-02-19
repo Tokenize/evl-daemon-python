@@ -95,11 +95,20 @@ class Status:
         self.storage = []
         self.listeners = []
 
+        self.partitions = {}
+        self.zones = {}
+
         self.last_event = None
 
         self.connection = {'hostname': '', 'port': 0}
 
     def update(self, event: Event):
+        if event.partition:
+            self.partitions[event.partition] = event.describe()
+
+        if event.zone:
+            self.zones[event.zone] = event.describe()
+
         self.last_event = event
 
     def report(self) -> dict:
@@ -113,6 +122,8 @@ class Status:
 
         return {
             'uptime': uptime.total_seconds(),
+            'partitions': self.partitions,
+            'zones': self.zones,
             'notifiers': [str(n) for n in self.notifiers],
             'storage': [str(s) for s in self.storage],
             'listeners': [str(l) for l in self.listeners],
