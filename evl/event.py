@@ -76,13 +76,17 @@ class Event:
 
         return description
 
+    def timestamp_str(self):
+        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.timestamp))
+
     def __str__(self) -> str:
         return self.describe()
 
 
 class Status:
     """
-    Represents the current status of the device, partitions, zones, connection, etc.
+    Represents the current status of the device, partitions, zones, connection,
+    etc.
     """
 
     def __init__(self):
@@ -101,13 +105,19 @@ class Status:
     def report(self) -> dict:
         uptime = datetime.now() - self.started_at
 
+        last_event = ''
+        if self.last_event:
+            last_event = "[{timestamp}] {description}]".format(
+                timestamp=self.last_event.timestamp_str(),
+                description=self.last_event.describe())
+
         return {
             'uptime': uptime.total_seconds(),
-            'notifiers': self.notifiers,
-            'storage': self.storage,
-            'listeners': self.listeners,
+            'notifiers': [str(n) for n in self.notifiers],
+            'storage': [str(s) for s in self.storage],
+            'listeners': [str(l) for l in self.listeners],
             'connection': self.connection,
-            'last_event': self.last_event
+            'last_event': last_event
         }
 
 

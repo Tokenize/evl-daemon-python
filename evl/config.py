@@ -98,7 +98,8 @@ def load_storage(config: list) -> list:
         # Set up storage engines defined in configuration file
         if kind == 'memory':
             max_size = storage.get('maxSize', DEFAULT_STORAGE_MAX_LENGTH)
-            new_storage = memory.MemoryStorage(size=max_size)
+            name = storage.get('name', 'Memory')
+            new_storage = memory.MemoryStorage(size=max_size, name=name)
         else:
             new_storage = None
 

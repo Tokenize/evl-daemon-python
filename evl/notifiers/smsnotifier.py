@@ -32,19 +32,15 @@ class SmsNotifier:
 
         self.client = Client(sid, auth_token)
 
-        self.timestamp_format = '%Y-%m-%d %H:%M:%S'
-
     def __str__(self):
         return self.name
 
     def notify(self, event: Event):
-        timestamp = strftime(self.timestamp_format, localtime(event.timestamp))
-
         if event.priority.value >= self.priority.value:
-            self._send_sms(event, timestamp)
+            self._send_sms(event)
 
-    def _send_sms(self, event: Event, timestamp):
-        message = self.layout.format(timestamp=timestamp,
+    def _send_sms(self, event: Event):
+        message = self.layout.format(timestamp=event.timestamp_str(),
                                      priority=event.priority, event=event)
 
         try:
