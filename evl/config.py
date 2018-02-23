@@ -24,7 +24,7 @@ def load_listeners(config: list, event_manager) -> list:
 
         if kind == 'http':
             port = listener.get('port', 2504)
-            new_listener = http.HttpListener(event_manager, port)
+            new_listener = http.HttpListener(name, port, event_manager)
 
         else:
             new_listener = None

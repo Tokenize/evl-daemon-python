@@ -47,6 +47,7 @@ class EvlDaemon:
         self.event_manager.add_storages(self.storage)
 
         self.listeners = conf.load_listeners(self.config.get('listeners', []), self.event_manager)
+        self.status.listeners = self.listeners
         for listener in self.listeners:
             self.greenlet_group.spawn(listener.listen)
 
