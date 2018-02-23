@@ -31,7 +31,8 @@
             "name": "http",
             "type": "http",
             "settings": {
-                "port": "2504"
+                "port": "5204",
+                "auth_token": "SECRET"
             }
         }
     ],
