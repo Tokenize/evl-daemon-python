@@ -23,8 +23,10 @@ def load_listeners(config: list, event_manager) -> list:
         kind = listener['type']
 
         if kind == 'http':
-            port = listener.get('port', 2504)
-            new_listener = http.HttpListener(name, port, event_manager)
+            settings = listener.get('settings')
+            port = int(settings.get('port', 5204))
+            auth_token = settings.get('auth_token', '')
+            new_listener = http.HttpListener(name, port, auth_token, event_manager)
 
         else:
             new_listener = None
