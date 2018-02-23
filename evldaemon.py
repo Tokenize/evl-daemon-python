@@ -27,10 +27,7 @@ class EvlDaemon:
             config = {}
         self.config = config
 
-        self.notifiers = conf.load_notifiers(self.config.get('notifiers', []))
-        self.storage = conf.load_storage(self.config.get('storage', []))
-
-        self.queue_group = gevent.pool.Group()
+        self.greenlet_group = gevent.pool.Group()
         self.event_queue = gevent.queue.Queue()
 
         self.status = ev.Status()
@@ -41,29 +38,37 @@ class EvlDaemon:
 
         # TODO: Read command name, priority, login name, etc. overrides from config.
 
-        self.event_manager = ev.EventManager(self.event_queue, self.queue_group, status=self.status)
+        self.event_manager = ev.EventManager(self.event_queue, self.greenlet_group, status=self.status)
+
+        self.notifiers = conf.load_notifiers(self.config.get('notifiers', []))
         self.event_manager.add_notifiers(self.notifiers)
+
+        self.storage = conf.load_storage(self.config.get('storage', []))
         self.event_manager.add_storages(self.storage)
+
+        self.listeners = conf.load_listeners(self.config.get('listeners', []), self.event_manager)
+        for listener in self.listeners:
+            self.greenlet_group.spawn(listener.listen)
 
     def start(self):
         logger.debug("Starting daemon...")
         resolved = socket.gethostbyname(self.host)
         self.connection = conn.Connection(event_manager=self.event_manager,
-                                     queue_group=self.queue_group,
-                                     host=resolved,
-                                     password=self.password)
+                                          queue_group=self.greenlet_group,
+                                          host=resolved,
+                                          password=self.password)
 
         self.status.connection = {'hostname': resolved, 'port': self.connection.port}
 
         gevent.signal(signal.SIGINT, self.stop)
 
         self.connection.start()
-        self.queue_group.join()
+        self.greenlet_group.join()
 
     def stop(self):
         logger.debug("Stopping daemon...")
         self.connection.stop()
-        self.queue_group.kill()
+        self.greenlet_group.kill()
         logger.debug("Daemon stopped.")
 
 

@@ -26,6 +26,16 @@
         }
     ],
 
+    "listeners": [
+        {
+            "name": "http",
+            "type": "http",
+            "settings": {
+                "port": "2504"
+            }
+        }
+    ],
+
     "storage": [
         {
             "name": "memory",

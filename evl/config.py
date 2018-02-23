@@ -4,6 +4,7 @@ import os
 import sys
 
 import evl.command as cmd
+import evl.listeners.http as http
 import evl.notifiers.consolenotifier as console
 import evl.notifiers.smsnotifier as sms
 import evl.notifiers.emailnotifier as email
@@ -13,6 +14,25 @@ import evl.storage.memory as memory
 DEFAULT_STORAGE_MAX_LENGTH = 100
 
 logger = logging.getLogger(__name__)
+
+
+def load_listeners(config: list, event_manager) -> list:
+    listeners = []
+    for listener in config:
+        name = listener.get('name')
+        kind = listener['type']
+
+        if kind == 'http':
+            port = listener.get('port', 2504)
+            new_listener = http.HttpListener(event_manager, port)
+
+        else:
+            new_listener = None
+
+        if new_listener:
+            listeners.append(new_listener)
+
+    return listeners
 
 
 def load_logging(config: list) -> dict:

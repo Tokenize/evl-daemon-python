@@ -181,6 +181,9 @@ class EventManager:
     def enqueue(self, command: cmd.Command, data: str = ""):
         self._event_queue.put((command, data))
 
+    def status_report(self):
+        return self.status.report()
+
     def wait(self):
         """Initiate wait for incoming events in event queue."""
         while True:
