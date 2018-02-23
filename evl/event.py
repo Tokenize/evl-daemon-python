@@ -116,7 +116,7 @@ class Status:
 
         last_event = ''
         if self.last_event:
-            last_event = "[{timestamp}] {description}]".format(
+            last_event = "[{timestamp}] {description}".format(
                 timestamp=self.last_event.timestamp_str(),
                 description=self.last_event.describe())
 
