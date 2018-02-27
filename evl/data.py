@@ -76,17 +76,19 @@ def parse(command: cmd.Command, data: str) -> dict:
     parsed = {}
     command_type = command.command_type
 
-    parsed['data'] = data
     if command_type in cmd.ZONE_COMMANDS:
         # Zone commands always have zone as first 3 chars
         parsed['zone'] = data[0:3]
-
-    if command_type in cmd.PARTITION_COMMANDS:
+        parsed['data'] = data[3:]
+    elif command_type in cmd.PARTITION_COMMANDS:
         # Partition commands always have partition as first char
         parsed['partition'] = data[:1]
-
-    if command_type in cmd.PARTITION_AND_ZONE_COMMANDS:
+        parsed['data'] = data[1:]
+    elif command_type in cmd.PARTITION_AND_ZONE_COMMANDS:
         parsed['partition'] = data[:1]
         parsed['zone'] = data[1:4]
+        parsed['data'] = data[4:]
+    else:
+        parsed['data'] = data
 
     return parsed
