@@ -48,11 +48,28 @@ class Event:
         cmd_desc = self.command.describe()
         command_type = self.command.command_type
 
-        if command_type in cmd.LOGIN_COMMANDS:
+        # Specific command types
+        if command_type in (cmd.CommandType.KEYPAD_LED_FLASH_STATE, cmd.CommandType.KEYPAD_LED_STATE):
+            led_state = dt.describe_led_state(self.data)
+            description = "{command}: {state}".format(
+                command=cmd_desc,
+                state=led_state)
+        elif command_type in cmd.LOGIN_COMMANDS:
             login_type = dt.LoginType(self.data)
             description = "{command}: {login}".format(
                 command=cmd_desc,
                 login=dt.LOGIN_TYPE_NAMES[login_type])
+        elif command_type == cmd.CommandType.PARTITION_ARMED:
+            armed_type = dt.PartitionArmedType(self.data)
+            armed_name = dt.PARTITION_ARMED_NAMES[armed_type]
+
+            description = "{command} ({armed_name}): [{partition}]".format(
+                command=cmd_desc,
+                partition=self.partition_name(),
+                armed_name=armed_name
+            )
+
+        # General command types
         elif command_type in cmd.PARTITION_COMMANDS:
             description = "{command}: [{partition}]".format(
                 command=cmd_desc,
@@ -66,11 +83,6 @@ class Event:
             description = "{command}: {zone}".format(
                 command=cmd_desc,
                 zone=self.zone_name())
-        elif command_type in (cmd.CommandType.KEYPAD_LED_FLASH_STATE, cmd.CommandType.KEYPAD_LED_STATE):
-            led_state = dt.describe_led_state(self.data)
-            description = "{command}: {state}".format(
-                command=cmd_desc,
-                state=led_state)
         else:
             description = "{command}".format(command=cmd_desc)
 
@@ -95,6 +107,8 @@ class Status:
         self.storage = []
         self.listeners = []
 
+        self.armed_state = {}
+
         self.partitions = {}
         self.zones = {}
 
@@ -109,6 +123,11 @@ class Status:
         if event.zone:
             self.zones[event.zone] = event.describe()
 
+        command_type = event.command.command_type
+        if command_type in (cmd.CommandType.PARTITION_DISARMED,
+                            cmd.CommandType.PARTITION_ARMED):
+            self.armed_state[event.partition] = event.describe()
+
         self.last_event = event
 
     def report(self) -> dict:
@@ -122,6 +141,7 @@ class Status:
 
         return {
             'uptime': uptime.total_seconds(),
+            'armed_state': self.armed_state,
             'partitions': self.partitions,
             'zones': self.zones,
             'notifiers': [str(n) for n in self.notifiers],
