@@ -97,6 +97,7 @@ class CommandType(Enum):
     COMMAND_OUTPUT_PRESSED = "912"
     MASTER_CODE_REQUIRED = "921"
     INSTALLERS_CODE_REQUIRED = "922"
+    SOFTWARE_ZONE_ALARM = "S01"
 
 
 class Priority(Enum):
@@ -181,7 +182,8 @@ NAMES = {
     CommandType.CODE_REQUIRED: "Code Required",
     CommandType.COMMAND_OUTPUT_PRESSED: "Command Output Pressed",
     CommandType.MASTER_CODE_REQUIRED: "Master Code Required",
-    CommandType.INSTALLERS_CODE_REQUIRED: "Installers Code Required"
+    CommandType.INSTALLERS_CODE_REQUIRED: "Installers Code Required",
+    CommandType.SOFTWARE_ZONE_ALARM: "Software Zone Alarm"
 }
 
 # Priorities are Priority.LOW by default. Only commands that are higher priority
@@ -234,6 +236,7 @@ PRIORITIES = {
     CommandType.COMMAND_OUTPUT_PRESSED: Priority.HIGH,
     CommandType.MASTER_CODE_REQUIRED: Priority.HIGH,
     CommandType.INSTALLERS_CODE_REQUIRED: Priority.HIGH,
+    CommandType.SOFTWARE_ZONE_ALARM: Priority.HIGH,
 }
 
 LOGIN_COMMANDS = {
@@ -279,6 +282,7 @@ ZONE_COMMANDS = {
     CommandType.ZONE_FAULT,
     CommandType.ZONE_FAULT_RESTORE,
     CommandType.ZONE_OPEN,
-    CommandType.ZONE_RESTORED
+    CommandType.ZONE_RESTORED,
+    CommandType.SOFTWARE_ZONE_ALARM
 }
 
