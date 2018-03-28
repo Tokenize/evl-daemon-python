@@ -70,12 +70,12 @@ def load_logging(config: list) -> dict:
     return log_config
 
 
-def load_notifiers(config: list) -> list:
+def load_notifiers(config: list) -> dict:
     """
     Load notifiers from given list of notifier configurations
     :param config: List of notifier configuration dicts
     """
-    notifiers = []
+    notifiers = {}
     for notifier in config:
         priority = cmd.Priority[notifier.get('priority', 'LOW').upper()]
         name = notifier.get('name')
@@ -105,7 +105,8 @@ def load_notifiers(config: list) -> list:
             new_notifier = None
 
         if new_notifier:
-            notifiers.append(new_notifier)
+            notifiers[name] = new_notifier
+
     return notifiers
 
 

@@ -5,6 +5,7 @@ from datetime import datetime
 
 import evl.command as cmd
 import evl.data as dt
+import evl.util as util
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +165,7 @@ class EventManager:
     def __init__(self, event_queue, queue_group=None, notifiers: list=None, storage: list=None, status: Status=None):
 
         if notifiers is None:
-            notifiers = []
+            notifiers = {}
         self._notifiers = notifiers
 
         if storage is None:
@@ -184,12 +185,12 @@ class EventManager:
             self._queue_group = queue_group
             self._queue_group.spawn(self.wait)
 
-    def add_notifiers(self, notifiers: list):
+    def add_notifiers(self, notifiers: dict):
         """
         Adds a list of notifiers to the existing list.
         :param notifiers: List of notifiers to add to notifier list
         """
-        self._notifiers.extend(notifiers)
+        self._notifiers = util.merge_dicts(self._notifiers, notifiers)
 
     def add_storages(self, storages: list):
         """
@@ -217,7 +218,7 @@ class EventManager:
             for storage in self._storage:
                 storage.store(event)
 
-            for notifier in self._notifiers:
+            for _, notifier in self._notifiers.items():
                 try:
                     notifier.notify(event)
                 except Exception as e:

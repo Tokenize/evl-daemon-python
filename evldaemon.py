@@ -40,7 +40,7 @@ class EvlDaemon:
 
         self.event_manager = ev.EventManager(self.event_queue, self.greenlet_group, status=self.status)
 
-        self.notifiers = conf.load_notifiers(self.config.get('notifiers', []))
+        self.notifiers = conf.load_notifiers(self.config.get('notifiers', {}))
         self.event_manager.add_notifiers(self.notifiers)
 
         self.storage = conf.load_storage(self.config.get('storage', []))
