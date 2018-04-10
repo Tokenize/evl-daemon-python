@@ -1,22 +1,24 @@
 import argparse
-import socket
+import logging
+import logging.config
 import signal
+import socket
+
 import gevent.pool
 import gevent.queue
 import gevent.signal
-import logging
-import logging.config
 
+import evl.config as conf
 import evl.connection as conn
 import evl.event as ev
-import evl.config as conf
-
 
 logger = logging.getLogger('evl')
 
 
 class EvlDaemon:
-    def __init__(self, host: str, password: str, port: int, config: dict=None):
+
+    def __init__(self, host: str, password: str, port: int,
+                 config: dict = None):
 
         self.host = host
         self.password = password
@@ -38,7 +40,8 @@ class EvlDaemon:
 
         # TODO: Read command name, priority, login name, etc. overrides from config.
 
-        self.event_manager = ev.EventManager(self.event_queue, self.greenlet_group, status=self.status)
+        self.event_manager = ev.EventManager(
+            self.event_queue, self.greenlet_group, status=self.status)
 
         self.notifiers = conf.load_notifiers(self.config.get('notifiers', {}))
         self.event_manager.add_notifiers(self.notifiers)
@@ -46,7 +49,8 @@ class EvlDaemon:
         self.storage = conf.load_storage(self.config.get('storage', []))
         self.event_manager.add_storages(self.storage)
 
-        self.listeners = conf.load_listeners(self.config.get('listeners', []), self.event_manager)
+        self.listeners = conf.load_listeners(
+            self.config.get('listeners', []), self.event_manager)
         self.status.listeners = self.listeners
         for listener in self.listeners:
             self.greenlet_group.spawn(listener.listen)
@@ -54,12 +58,16 @@ class EvlDaemon:
     def start(self):
         logger.debug("Starting daemon...")
         resolved = socket.gethostbyname(self.host)
-        self.connection = conn.Connection(event_manager=self.event_manager,
-                                          queue_group=self.greenlet_group,
-                                          host=resolved,
-                                          password=self.password)
+        self.connection = conn.Connection(
+            event_manager=self.event_manager,
+            queue_group=self.greenlet_group,
+            host=resolved,
+            password=self.password)
 
-        self.status.connection = {'hostname': resolved, 'port': self.connection.port}
+        self.status.connection = {
+            'hostname': resolved,
+            'port': self.connection.port
+        }
 
         gevent.signal(signal.SIGINT, self.stop)
 
@@ -76,8 +84,8 @@ class EvlDaemon:
 def main():
     print("Welcome to EvlDaemon.")
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', required=False,
-                        default="~/.evldaemon/config.json")
+    parser.add_argument(
+        '-c', '--config', required=False, default="~/.evldaemon/config.json")
     options = parser.parse_args()
     config = conf.read(options.config)
 
