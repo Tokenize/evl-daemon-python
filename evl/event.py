@@ -49,7 +49,7 @@ class Event:
             return ""
         return EventManager.partitions.get(
             self.partition,
-                                           "Partition {partition}".format(partition=self.partition))
+            "Partition {partition}".format(partition=self.partition))
 
     def describe(self) -> str:
         """
@@ -262,9 +262,12 @@ class EventManager:
             for storage in self._storage:
                 storage.store(event)
 
-            for _, notifier in self._notifiers.items():
-                try:
-                    notifier.notify(event)
-                except Exception as e:
-                    logger.error("Error notifying on {name}: {exception}".format(
-                        name=notifier, exception=e))
+            for key in list(self._notifiers):
+                notifier = self._notifiers.get(key, None)
+                if notifier:
+                    try:
+                        notifier.notify(event)
+                    except Exception as e:
+                        logger.error(
+                            "Error notifying on {name}: {exception}".format(
+                                name=notifier, exception=e))
