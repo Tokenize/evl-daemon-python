@@ -31,12 +31,20 @@ class Event:
         self.timestamp = timestamp
 
     def zone_name(self) -> str:
+        """
+        Returns the zone name associated with this event, if applicable.
+        :return: Zone name
+        """
         if self.zone is None:
             return ""
         return EventManager.zones.get(
             self.zone, "Zone {zone}".format(zone=self.zone))
 
     def partition_name(self) -> str:
+        """
+        Returns the partition name associated with this event, if applicable.
+        :return: Partition name
+        """
         if self.partition is None:
             return ""
         return EventManager.partitions.get(
@@ -89,11 +97,19 @@ class Event:
 
         return description
 
-    def timestamp_str(self):
+    def timestamp_str(self) -> str:
+        """
+        Returns a formatted date of the event's timestamp.
+        :return: Formatted date string
+        """
         return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
             self.timestamp))
 
     def __str__(self) -> str:
+        """
+        Returns a description of the event.
+        :return: Description of event
+        """
         return self.describe()
 
 
@@ -118,7 +134,11 @@ class Status:
 
         self.connection = {'hostname': '', 'port': 0}
 
-    def update(self, event: Event):
+    def update(self, event: Event) -> None:
+        """
+        Updates the status of the system with the details from the given event.
+        :param event: Event to be used to update status
+        """
         if event.partition:
             self.partitions[event.partition] = event.describe()
 
@@ -133,6 +153,10 @@ class Status:
         self.last_event = event
 
     def report(self) -> dict:
+        """
+        Returns a dict containing various system status details.
+        :return: Dict of system status details
+        """
         uptime = datetime.now() - self.started_at
 
         last_event = ''
@@ -156,14 +180,19 @@ class Status:
 
 class EventManager:
     """
-    Represents an event manager that waits for incoming events from an event queue
-    and dispatches events to its list of event notifiers.
+    Represents an event manager that waits for incoming events from an event
+    queue and dispatches events to its list of event notifiers.
     """
 
     partitions = {}
     zones = {}
 
-    def __init__(self, event_queue, queue_group=None, notifiers: list=None, storage: list=None, status: Status=None):
+    def __init__(self,
+                 event_queue,
+                 queue_group=None,
+                 notifiers: list = None,
+                 storage: list = None,
+                 status: Status = None):
 
         if notifiers is None:
             notifiers = {}
@@ -186,27 +215,41 @@ class EventManager:
             self._queue_group = queue_group
             self._queue_group.spawn(self.wait)
 
-    def add_notifiers(self, notifiers: dict):
+    def add_notifiers(self, notifiers: dict) -> None:
         """
         Adds a list of notifiers to the existing list.
         :param notifiers: List of notifiers to add to notifier list
         """
         self._notifiers = util.merge_dicts(self._notifiers, notifiers)
 
-    def add_storages(self, storages: list):
+    def remove_notifier(self, name: str) -> None:
+        """
+        Removes the notifier with the given name from the list of active
+        notifiers.
+        :param name: Name of notifier to remove
+        """
+        self._notifiers.pop(name, None)
+
+    def add_storages(self, storages: list) -> None:
         """
         Adds an event storage engine
         :param storages: Storage engine to add to storage list
         """
         self._storage.extend(storages)
 
-    def enqueue(self, command: cmd.Command, data: str = ""):
+    def enqueue(self, command: cmd.Command, data: str = "") -> None:
+        """
+        Adds the given command and data to the event queue to be processed.
+        :param command: Command to add to the event queue
+        :param data: Data to add to the event queue with the given command
+        """
         self._event_queue.put((command, data))
 
-    def status_report(self):
+    def status_report(self) -> str:
+        """Returns the current status report of the system."""
         return self.status.report()
 
-    def wait(self):
+    def wait(self) -> None:
         """Initiate wait for incoming events in event queue."""
         while True:
             (command, data) = self._event_queue.get()
