@@ -23,7 +23,8 @@ class Event:
         self.zone = data.get('zone', None)
         self.partition = data.get('partition', None)
 
-        self.priority = cmd.PRIORITIES.get(command.command_type, cmd.Priority.LOW)
+        self.priority = cmd.PRIORITIES.get(command.command_type,
+                                           cmd.Priority.LOW)
 
         if timestamp is None:
             timestamp = int(time.time())
@@ -32,13 +33,14 @@ class Event:
     def zone_name(self) -> str:
         if self.zone is None:
             return ""
-        return EventManager.zones.get(self.zone, "Zone {zone}".format(
-            zone=self.zone))
+        return EventManager.zones.get(
+            self.zone, "Zone {zone}".format(zone=self.zone))
 
     def partition_name(self) -> str:
         if self.partition is None:
             return ""
-        return EventManager.partitions.get(self.partition,
+        return EventManager.partitions.get(
+            self.partition,
                                            "Partition {partition}".format(partition=self.partition))
 
     def describe(self) -> str:
@@ -50,16 +52,17 @@ class Event:
         command_type = self.command.command_type
 
         # Specific command types
-        if command_type in (cmd.CommandType.KEYPAD_LED_FLASH_STATE, cmd.CommandType.KEYPAD_LED_STATE):
+        if command_type in (cmd.CommandType.KEYPAD_LED_FLASH_STATE,
+                            cmd.CommandType.KEYPAD_LED_STATE):
             led_state = dt.describe_led_state(self.data)
             description = "{command}: {state}".format(
-                command=cmd_desc,
-                state=led_state)
+                command=cmd_desc, state=led_state)
+
         elif command_type in cmd.LOGIN_COMMANDS:
             login_type = dt.LoginType(self.data)
             description = "{command}: {login}".format(
-                command=cmd_desc,
-                login=dt.LOGIN_TYPE_NAMES[login_type])
+                command=cmd_desc, login=dt.LOGIN_TYPE_NAMES[login_type])
+
         elif command_type == cmd.CommandType.PARTITION_ARMED:
             armed_type = dt.PartitionArmedType(self.data)
             armed_name = dt.PARTITION_ARMED_NAMES[armed_type]
@@ -67,14 +70,12 @@ class Event:
             description = "{command} ({armed_name}): [{partition}]".format(
                 command=cmd_desc,
                 partition=self.partition_name(),
-                armed_name=armed_name
-            )
+                armed_name=armed_name)
 
         # General command types
         elif command_type in cmd.PARTITION_COMMANDS:
             description = "{command}: [{partition}]".format(
-                command=cmd_desc,
-                partition=self.partition_name())
+                command=cmd_desc, partition=self.partition_name())
         elif command_type in cmd.PARTITION_AND_ZONE_COMMANDS:
             description = "{command}: [{partition}] {zone}".format(
                 command=cmd_desc,
@@ -82,15 +83,15 @@ class Event:
                 zone=self.zone_name())
         elif command_type in cmd.ZONE_COMMANDS:
             description = "{command}: {zone}".format(
-                command=cmd_desc,
-                zone=self.zone_name())
+                command=cmd_desc, zone=self.zone_name())
         else:
             description = "{command}".format(command=cmd_desc)
 
         return description
 
     def timestamp_str(self):
-        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.timestamp))
+        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
+            self.timestamp))
 
     def __str__(self) -> str:
         return self.describe()
