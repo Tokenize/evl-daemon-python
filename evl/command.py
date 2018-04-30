@@ -283,6 +283,6 @@ ZONE_COMMANDS = {
     CommandType.ZONE_FAULT_RESTORE,
     CommandType.ZONE_OPEN,
     CommandType.ZONE_RESTORED,
-    CommandType.SOFTWARE_ZONE_ALARM
+    CommandType.SOFTWARE_ZONE_ALARM,
 }
 
