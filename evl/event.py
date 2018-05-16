@@ -190,8 +190,8 @@ class EventManager:
     def __init__(self,
                  event_queue,
                  queue_group=None,
-                 notifiers: list = None,
-                 storage: list = None,
+                 notifiers: dict = None,
+                 storage: dict = None,
                  status: Status = None):
 
         if notifiers is None:
@@ -199,15 +199,15 @@ class EventManager:
         self._notifiers = notifiers
 
         if storage is None:
-            storage = []
-        self._storage = storage
+            storage = {}
+        self.storage = storage
 
         if status is None:
             status = Status()
 
         self.status = status
         self.status.notifiers = self._notifiers
-        self.status.storage = self._storage
+        self.status.storage = self.storage
 
         self._event_queue = event_queue
 
@@ -217,8 +217,8 @@ class EventManager:
 
     def add_notifiers(self, notifiers: dict) -> None:
         """
-        Adds a list of notifiers to the existing list.
-        :param notifiers: List of notifiers to add to notifier list
+        Adds a dictionary of notifiers to the existing dictionary.
+        :param notifiers: Dictionary of notifiers to add to notifier dictionary
         """
         self._notifiers = util.merge_dicts(self._notifiers, notifiers)
 
@@ -230,12 +230,12 @@ class EventManager:
         """
         self._notifiers.pop(name, None)
 
-    def add_storages(self, storages: list) -> None:
+    def add_storages(self, storages: dict) -> None:
         """
-        Adds an event storage engine
-        :param storages: Storage engine to add to storage list
+        Adds a dictionary of storages to the existing dictionary.
+        :param storages: Dictionary of storages to add to storage dictionary
         """
-        self._storage.extend(storages)
+        self.storage = util.merge_dicts(self.storage, storages)
 
     def enqueue(self, command: cmd.Command, data: str = "") -> None:
         """
@@ -259,11 +259,13 @@ class EventManager:
 
             self.status.update(event)
 
-            for storage in self._storage:
-                storage.store(event)
+            for storage_key in list(self.storage):
+                storage = self.storage.get(storage_key, None)
+                if storage:
+                    storage.store(event)
 
-            for key in list(self._notifiers):
-                notifier = self._notifiers.get(key, None)
+            for notifier_key in list(self._notifiers):
+                notifier = self._notifiers.get(notifier_key, None)
                 if notifier:
                     try:
                         notifier.notify(event)

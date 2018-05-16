@@ -110,24 +110,24 @@ def load_notifiers(config: list) -> dict:
     return notifiers
 
 
-def load_storage(config: list) -> list:
+def load_storage(config: list) -> dict:
     """
     Load storage engines from given list of storage configurations
     :param config: List of storage engine configuration dicts
     """
-    storages = []
+    storages = {}
     for storage in config:
         kind = storage['type']
         # Set up storage engines defined in configuration file
         if kind == 'memory':
             max_size = storage.get('maxSize', DEFAULT_STORAGE_MAX_LENGTH)
-            name = storage.get('name', 'Memory')
+            name = storage.get('name', 'memory')
             new_storage = memory.MemoryStorage(size=max_size, name=name)
         else:
             new_storage = None
 
         if new_storage:
-            storages.append(new_storage)
+            storages[name] = new_storage
     return storages
 
 

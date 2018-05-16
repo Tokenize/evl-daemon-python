@@ -46,7 +46,7 @@ class EvlDaemon:
         self.notifiers = conf.load_notifiers(self.config.get('notifiers', {}))
         self.event_manager.add_notifiers(self.notifiers)
 
-        self.storage = conf.load_storage(self.config.get('storage', []))
+        self.storage = conf.load_storage(self.config.get('storage', {}))
         self.event_manager.add_storages(self.storage)
 
         self.listeners = conf.load_listeners(
