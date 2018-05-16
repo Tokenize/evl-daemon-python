@@ -9,11 +9,11 @@ class MemoryStorage:
         self.name = name
         self._deque = deque(maxlen=self.size)
 
-    def store(self, event: Event):
+    def store(self, event: Event) -> None:
         self._deque.append(event)
 
-    def all(self):
-        return self._deque
+    def all(self) -> list:
+        return list(self._deque)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "{name}".format(name=self.name)

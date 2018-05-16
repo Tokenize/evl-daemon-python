@@ -10,7 +10,7 @@ class Command:
         except ValueError:
             self.command_type = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.describe()
 
     def describe(self) -> str:
