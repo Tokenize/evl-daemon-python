@@ -245,7 +245,7 @@ class EventManager:
         """
         self._event_queue.put((command, data))
 
-    def status_report(self) -> str:
+    def status_report(self) -> dict:
         """Returns the current status report of the system."""
         return self.status.report()
 
