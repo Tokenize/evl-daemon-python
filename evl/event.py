@@ -121,8 +121,8 @@ class Status:
 
     def __init__(self):
         self.started_at = datetime.now()
-        self.notifiers = []
-        self.storage = []
+        self.notifiers = {}
+        self.storage = {}
         self.listeners = []
 
         self.armed_state = {}
@@ -170,8 +170,8 @@ class Status:
             'armed_state': self.armed_state,
             'partitions': self.partitions,
             'zones': self.zones,
-            'notifiers': [str(n) for n in self.notifiers],
-            'storage': [str(s) for s in self.storage],
+            'notifiers': [str(n) for _, n in self.notifiers.items()],
+            'storage': [str(s) for _,s in self.storage.items()],
             'listeners': [str(l) for l in self.listeners],
             'connection': self.connection,
             'last_event': last_event
@@ -221,6 +221,7 @@ class EventManager:
         :param notifiers: Dictionary of notifiers to add to notifier dictionary
         """
         self._notifiers = util.merge_dicts(self._notifiers, notifiers)
+        self.status.notifiers = self._notifiers
 
     def remove_notifier(self, name: str) -> None:
         """
@@ -236,6 +237,7 @@ class EventManager:
         :param storages: Dictionary of storages to add to storage dictionary
         """
         self.storage = util.merge_dicts(self.storage, storages)
+        self.status.storage = self.storage
 
     def enqueue(self, command: cmd.Command, data: str = "") -> None:
         """
