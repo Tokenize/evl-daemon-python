@@ -26,7 +26,8 @@ def load_listeners(config: list, event_manager) -> list:
             settings = listener.get('settings')
             port = int(settings.get('port', 5204))
             auth_token = settings.get('auth_token', '')
-            new_listener = http.HttpListener(name, port, auth_token, event_manager)
+            new_listener = http.HttpListener(name, port, auth_token,
+                                             event_manager, 'memory')
 
         else:
             new_listener = None

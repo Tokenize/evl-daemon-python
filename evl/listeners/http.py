@@ -2,26 +2,55 @@ import flask
 import gevent.wsgi as wsgi
 import logging
 
+import evl.command as cmd
 import evl.event as ev
 import evl.tasks.silentarm as silentarm
 
 logger = logging.getLogger(__name__)
 
 
+class EvlJsonSerializer(flask.json.JSONEncoder):
+
+    def default(self, o):
+        if isinstance(o, ev.Event):
+            logger.debug("Serializing event...")
+            event_json = {
+                "command": o.command.number,
+                "data": o.data,
+                "zone": o.zone,
+                "partition": o.partition,
+                "priority": o.priority.name,
+                "timestamp": o.timestamp,
+                "description": o.describe()
+            }
+            return event_json
+        elif isinstance(o, cmd.Command):
+            return o.describe()
+        elif isinstance(o, cmd.CommandType):
+            return o.name
+        elif isinstance(o, cmd.Priority):
+            return o.name
+
+        return flask.json.JSONEncoder.default(self, o)
+
+
 class HttpListener:
     """A listener that listens for HTTP commands on the given port."""
 
     def __init__(self, name: str, port: int, auth_token: str,
-                 event_manager: ev.EventManager):
+                 event_manager: ev.EventManager, storage: str = ""):
         self.app = flask.Flask(__name__)
+        self.app.json_encoder = EvlJsonSerializer
 
         self.name = name
         self.port = port
         self.auth_token = auth_token
         self.event_manager = event_manager
+        self.storage = storage
 
         self.current_tasks = {}
 
+        self.app.add_url_rule('/events', '/events', self.get_events)
         self.app.add_url_rule('/status_report', '/status_report',
                               self.get_status_report)
         self.app.add_url_rule(
@@ -45,6 +74,18 @@ class HttpListener:
         logger.debug("Starting HTTP listener...")
         server = wsgi.WSGIServer(('', self.port), self.app)
         server.serve_forever()
+
+    def get_events(self) -> flask.Response:
+        """
+        Returns a JSON representation of past events.
+        :returns: JSON representation of past events
+        """
+        self._authorize()
+        storage = self.event_manager.storage.get(self.storage, None)
+        if storage:
+            return flask.jsonify(storage.all())
+        else:
+            return flask.jsonify({})
 
     def get_status_report(self) -> flask.Response:
         """
