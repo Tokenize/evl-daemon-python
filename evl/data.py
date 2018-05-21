@@ -91,4 +91,7 @@ def parse(command: cmd.Command, data: str) -> dict:
     else:
         parsed['data'] = data
 
+    if parsed['data'] == "":
+        parsed['data'] = None
+
     return parsed
