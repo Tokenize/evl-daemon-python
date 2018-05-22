@@ -166,15 +166,19 @@ class Status:
                 description=self.last_event.describe())
 
         return {
-            'uptime': uptime.total_seconds(),
+            'statuses': {
+                'zones': self.zones,
+                'partitions': self.partitions
+            },
             'armed_state': self.armed_state,
-            'partitions': self.partitions,
-            'zones': self.zones,
-            'notifiers': [str(n) for _, n in self.notifiers.items()],
-            'storage': [str(s) for _,s in self.storage.items()],
-            'listeners': [str(l) for l in self.listeners],
             'connection': self.connection,
-            'last_event': last_event
+            'last_event': last_event,
+            'listeners': [str(l) for l in self.listeners],
+            'notifiers': [str(n) for _, n in self.notifiers.items()],
+            'partitions': util.describe_dict(EventManager.partitions),
+            'storage': [str(s) for _, s in self.storage.items()],
+            'uptime': uptime.total_seconds(),
+            'zones': util.describe_dict(EventManager.zones)
         }
 
 
