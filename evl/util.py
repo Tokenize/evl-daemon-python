@@ -17,4 +17,4 @@ def describe_dict(d: dict) -> list:
     :param d: Dictionary to describe
     :return: List of name, number dicts
     """
-    return [{'name': name, 'number': number} for name, number in d.items()]
+    return [{'name': name, 'number': number} for number, name in d.items()]
