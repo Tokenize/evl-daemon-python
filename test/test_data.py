@@ -16,14 +16,14 @@ class TestData(unittest.TestCase):
         data = "001"
         parsed = dt.parse(command, data)
 
-        self.assertEqual(parsed, {'zone': '001', 'data': ''})
+        self.assertEqual(parsed, {'zone': '001', 'data': None})
 
     def test_zone_partition_data_parse(self):
         command = cmd.Command("601")
         data = "1001"
         parsed = dt.parse(command, data)
 
-        self.assertEqual(parsed, {'partition': '1', 'zone': '001', 'data': ''})
+        self.assertEqual(parsed, {'partition': '1', 'zone': '001', 'data': None})
 
     def test_data_parse(self):
         command = cmd.Command("510")
