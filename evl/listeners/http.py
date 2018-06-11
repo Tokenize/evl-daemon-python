@@ -1,5 +1,5 @@
 import flask
-import gevent.wsgi as wsgi
+import gevent.pywsgi as wsgi
 import logging
 
 import evl.command as cmd
