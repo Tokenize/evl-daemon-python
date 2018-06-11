@@ -60,6 +60,7 @@ class HttpListener:
 
     def __str__(self):
         """Returns s string representation of the HTTP listener."""
+
         return self.name
 
     def _authorize(self) -> None:
@@ -67,12 +68,14 @@ class HttpListener:
         Compares given auth_token parameter with listener's auth_token value
         and aborts with a 403 Unauthorized response if they do not match.
         """
+
         auth_token = flask.request.args.get('auth_token')
         if auth_token != self.auth_token:
             flask.abort(403)
 
     def listen(self) -> None:
         """Starts the HTTP listener."""
+
         logger.debug("Starting HTTP listener...")
         server = wsgi.WSGIServer(('', self.port), self.app)
         server.serve_forever()
@@ -82,6 +85,7 @@ class HttpListener:
         Returns a JSON representation of past events.
         :returns: JSON representation of past events
         """
+
         self._authorize()
         storage = self.event_manager.storage.get(self.storage, None)
         if storage:
@@ -94,6 +98,7 @@ class HttpListener:
         Returns a JSON representation of the current system status.
         :returns: JSON representation of current system status
         """
+
         self._authorize()
         return flask.jsonify(self.event_manager.status_report())
 
@@ -102,6 +107,7 @@ class HttpListener:
         Performs the task specified in the request body.
         :returns: Result of performing given task
         """
+
         self._authorize()
         task = flask.request.get_json()
 
@@ -119,6 +125,7 @@ class HttpListener:
         :param task: Dictionary containing task details
         :returns: Result of creating the given task
         """
+
         if task['type'] == 'silent_arm':
             return self._create_silent_arm(task)
         else:
@@ -130,6 +137,7 @@ class HttpListener:
         :param task: Details of task to delete
         :returns: Result of deleting the given task
         """
+
         if task['type'] == 'silent_arm':
             silent_arm = self.current_tasks.get('silent-arm', None)
             if not silent_arm:
@@ -146,6 +154,7 @@ class HttpListener:
         :param: Silent alarm task details
         :returns: Result of creating silent alarm task
         """
+        
         if self.current_tasks.get('silent-arm', None):
             flask.abort(400)
 

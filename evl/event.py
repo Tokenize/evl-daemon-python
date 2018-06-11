@@ -35,6 +35,7 @@ class Event:
         Returns the zone name associated with this event, if applicable.
         :return: Zone name
         """
+
         if self.zone is None:
             return ""
         return EventManager.zones.get(
@@ -45,6 +46,7 @@ class Event:
         Returns the partition name associated with this event, if applicable.
         :return: Partition name
         """
+
         if self.partition is None:
             return ""
         return EventManager.partitions.get(
@@ -56,6 +58,7 @@ class Event:
         Describes the event based on its command and data.
         :return: Description of event
         """
+
         cmd_desc = self.command.describe()
         description = "{command}: {data}".format(command=cmd_desc,
                                                  data=self.describe_data())
@@ -104,6 +107,7 @@ class Event:
         Returns a formatted date of the event's timestamp.
         :return: Formatted date string
         """
+
         return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
             self.timestamp))
 
@@ -112,6 +116,7 @@ class Event:
         Returns a description of the event.
         :return: Description of event
         """
+
         return self.describe()
 
 
@@ -141,6 +146,7 @@ class Status:
         Updates the status of the system with the details from the given event.
         :param event: Event to be used to update status
         """
+
         if event.partition:
             self.partitions[event.partition] = event.describe()
 
@@ -159,6 +165,7 @@ class Status:
         Returns a dict containing various system status details.
         :return: Dict of system status details
         """
+
         uptime = datetime.now() - self.started_at
 
         last_event = ''
