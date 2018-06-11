@@ -13,7 +13,6 @@ class EvlJsonSerializer(flask.json.JSONEncoder):
 
     def default(self, o):
         if isinstance(o, ev.Event):
-            logger.debug("Serializing event...")
             event_json = {
                 "command": o.command.number,
                 "data": o.data,
@@ -21,7 +20,10 @@ class EvlJsonSerializer(flask.json.JSONEncoder):
                 "partition": o.partition,
                 "priority": o.priority.name,
                 "timestamp": o.timestamp,
-                "description": o.describe()
+                "description": {
+                    "data": o.describe_data(),
+                    "command": o.command.describe()
+                }
             }
             return event_json
         elif isinstance(o, cmd.Command):

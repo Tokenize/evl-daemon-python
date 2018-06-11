@@ -57,45 +57,47 @@ class Event:
         :return: Description of event
         """
         cmd_desc = self.command.describe()
-        command_type = self.command.command_type
+        description = "{command}: {data}".format(command=cmd_desc,
+                                                 data=self.describe_data())
 
-        # Specific command types
+        return description
+
+    def describe_data(self) -> str:
+        """
+        Describes the event data based on command type.
+        :return: Description of command data
+        """
+
+        command_type = self.command.command_type
         if command_type in (cmd.CommandType.KEYPAD_LED_FLASH_STATE,
                             cmd.CommandType.KEYPAD_LED_STATE):
-            led_state = dt.describe_led_state(self.data)
-            description = "{command}: {state}".format(
-                command=cmd_desc, state=led_state)
+            return dt.describe_led_state(self.data)
 
         elif command_type in cmd.LOGIN_COMMANDS:
             login_type = dt.LoginType(self.data)
-            description = "{command}: {login}".format(
-                command=cmd_desc, login=dt.LOGIN_TYPE_NAMES[login_type])
+            return dt.LOGIN_TYPE_NAMES[login_type]
 
         elif command_type == cmd.CommandType.PARTITION_ARMED:
             armed_type = dt.PartitionArmedType(self.data)
             armed_name = dt.PARTITION_ARMED_NAMES[armed_type]
-
-            description = "{command} ({armed_name}): [{partition}]".format(
-                command=cmd_desc,
-                partition=self.partition_name(),
-                armed_name=armed_name)
+            return "({armed_name}: [{partition}]".format(
+                armed_name=armed_name,
+                partition=self.partition_name())
 
         # General command types
         elif command_type in cmd.PARTITION_COMMANDS:
-            description = "{command}: [{partition}]".format(
-                command=cmd_desc, partition=self.partition_name())
+            return self.partition_name()
+
         elif command_type in cmd.PARTITION_AND_ZONE_COMMANDS:
-            description = "{command}: [{partition}] {zone}".format(
-                command=cmd_desc,
+            return "[{partition}] {zone}".format(
                 partition=self.partition_name(),
                 zone=self.zone_name())
-        elif command_type in cmd.ZONE_COMMANDS:
-            description = "{command}: {zone}".format(
-                command=cmd_desc, zone=self.zone_name())
-        else:
-            description = "{command}".format(command=cmd_desc)
 
-        return description
+        elif command_type in cmd.ZONE_COMMANDS:
+            return self.zone_name()
+
+        else:
+            return ""
 
     def timestamp_str(self) -> str:
         """
