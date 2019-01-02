@@ -17,6 +17,7 @@ pylint = "*"
 six = "*"
 wrapt = "*"
 Flask = "*"
+aiohttp = "*"
 
 [dev-packages]
 
