@@ -18,6 +18,7 @@ six = "*"
 wrapt = "*"
 Flask = "*"
 aiohttp = "*"
+jsonpickle = "*"
 
 [dev-packages]
 
