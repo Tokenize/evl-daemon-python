@@ -202,7 +202,6 @@ class EventManager:
 
     def __init__(self,
                  event_queue,
-                 queue_group=None,
                  notifiers: dict = None,
                  storage: dict = None,
                  status: Status = None):
@@ -223,10 +222,6 @@ class EventManager:
         self.status.storage = self.storage
 
         self._event_queue = event_queue
-
-        if queue_group is not None:
-            self._queue_group = queue_group
-            self._queue_group.spawn(self.wait)
 
     def add_notifiers(self, notifiers: dict) -> None:
         """
@@ -252,22 +247,22 @@ class EventManager:
         self.storage = util.merge_dicts(self.storage, storages)
         self.status.storage = self.storage
 
-    def enqueue(self, command: cmd.Command, data: str = "") -> None:
+    async def enqueue(self, command: cmd.Command, data: str = "") -> None:
         """
         Adds the given command and data to the event queue to be processed.
         :param command: Command to add to the event queue
         :param data: Data to add to the event queue with the given command
         """
-        self._event_queue.put((command, data))
+        await self._event_queue.put((command, data))
 
     def status_report(self) -> dict:
         """Returns the current status report of the system."""
         return self.status.report()
 
-    def wait(self) -> None:
+    async def wait(self) -> None:
         """Initiate wait for incoming events in event queue."""
         while True:
-            (command, data) = self._event_queue.get()
+            (command, data) = await self._event_queue.get()
             parsed_data = dt.parse(command, data)
             timestamp = int(time.time())
             event = Event(command, parsed_data, timestamp)
