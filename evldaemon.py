@@ -73,7 +73,7 @@ class EvlDaemon:
         logger.debug("Daemon stopped.")
 
 
-async def main():
+def main():
     print("Welcome to EvlDaemon.")
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -101,8 +101,14 @@ async def main():
     port = config.get('port', 4025)
 
     ed = EvlDaemon(host, password, port, config)
-    await ed.start()
+    loop = asyncio.get_event_loop()
+
+    try:
+        loop.run_until_complete(ed.start())
+    except KeyboardInterrupt:
+        logger.debug("Ctrl+C pressed, stopping...")
+        ed.stop()
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
