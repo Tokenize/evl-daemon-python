@@ -30,7 +30,7 @@ class AsyncHttpListener:
 
         logger.debug("Request for path: {path}".format(path=path))
         if path == "/status_report":
-            return web.Response(text=self._status_report())
+            return web.Response(text=self._status_report(), content_type="application/json")
         else:
             return web.Response(text="Not found.", status=404)
 
