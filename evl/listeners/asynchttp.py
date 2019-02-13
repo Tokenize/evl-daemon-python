@@ -59,8 +59,14 @@ class AsyncHttpListener:
         logger.debug("Request for path: {path}".format(path=path))
         if path == "/status_report":
             return web.Response(text=self._status_report(), content_type="application/json")
+        elif path == "/events":
+            return web.Response(text=self._events(), content_type="application/json")
         else:
             return web.Response(text="Not found.", status=404)
+
+    def _events(self) -> str:
+        events = self.event_manager.storage[self.storage].all()
+        return json.dumps(events, cls=EvlJsonSerializer)
 
     def _status_report(self) -> str:
         status = self.event_manager.status_report()
