@@ -1,11 +1,39 @@
+import json
 import logging
 
+import evl.command as cmd
 import evl.event as ev
 
 from aiohttp import web
-import jsonpickle
 
 logger = logging.getLogger(__name__)
+
+
+class EvlJsonSerializer(json.JSONEncoder):
+
+    def default(self, o):
+        if isinstance(o, ev.Event):
+            event_json = {
+                "command": o.command.number,
+                "data": o.data,
+                "zone": o.zone,
+                "partition": o.partition,
+                "priority": o.priority.name,
+                "timestamp": o.timestamp,
+                "description": {
+                    "data": o.describe_data(),
+                    "command": o.command.describe()
+                }
+            }
+            return event_json
+        elif isinstance(o, cmd.Command):
+            return o.describe()
+        elif isinstance(o, cmd.CommandType):
+            return o.name
+        elif isinstance(o, cmd.Priority):
+            return o.name
+
+        return json.JSONEncoder.default(self, o)
 
 
 class AsyncHttpListener:
@@ -36,7 +64,7 @@ class AsyncHttpListener:
 
     def _status_report(self) -> str:
         status = self.event_manager.status_report()
-        return jsonpickle.encode(status, unpicklable=True)
+        return json.dumps(status, cls=EvlJsonSerializer)
 
     async def listen(self) -> None:
         logger.debug("Starting HTTP listener...")
