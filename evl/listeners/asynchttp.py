@@ -60,13 +60,19 @@ class AsyncHttpListener:
         if path == "/status_report":
             return web.Response(text=self._status_report(), content_type="application/json")
         elif path == "/events":
-            return web.Response(text=self._events(), content_type="application/json")
+            return self._events()
         else:
             return web.Response(text="Not found.", status=404)
 
-    def _events(self) -> str:
-        events = self.event_manager.storage[self.storage].all()
-        return json.dumps(events, cls=EvlJsonSerializer)
+    def _events(self) -> web.Response:
+        storage = self.event_manager.storage.get(self.storage, None)
+        if storage:
+            events = storage.all()
+        else:
+            events = []
+
+        content = json.dumps(events, cls=EvlJsonSerializer)
+        return web.Response(text=content, content_type="application/json")
 
     def _status_report(self) -> str:
         status = self.event_manager.status_report()
