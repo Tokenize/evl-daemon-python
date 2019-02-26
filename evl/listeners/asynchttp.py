@@ -58,7 +58,7 @@ class AsyncHttpListener:
 
         logger.debug("Request for path: {path}".format(path=path))
         if path == "/status_report":
-            return web.Response(text=self._status_report(), content_type="application/json")
+            return self._status_report()
         elif path == "/events":
             return self._events()
         else:
@@ -74,9 +74,10 @@ class AsyncHttpListener:
         content = json.dumps(events, cls=EvlJsonSerializer)
         return web.Response(text=content, content_type="application/json")
 
-    def _status_report(self) -> str:
+    def _status_report(self) -> web.Response:
         status = self.event_manager.status_report()
-        return json.dumps(status, cls=EvlJsonSerializer)
+        content = json.dumps(status, cls=EvlJsonSerializer)
+        return web.Response(text=content, content_type="application/json")
 
     async def listen(self) -> None:
         logger.debug("Starting HTTP listener...")
