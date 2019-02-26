@@ -51,16 +51,17 @@ class AsyncHttpListener:
 
     async def handler(self, request: web.Request) -> web.Response:
         path = request.path
+        method = request.method
 
         if request.query.get("auth_token", "") != self.auth_token:
             logger.debug("Unauthorized attempt to access path: {path}".format(path=path))
             return web.Response(text="Unauthorized.", status=403)
 
         logger.debug("Request for path: {path}".format(path=path))
-        if path == "/status_report":
-            return self._status_report()
-        elif path == "/events":
+        if path == "/events" and method == "GET":
             return self._events()
+        elif path == "/status_report" and method == "GET":
+            return self._status_report()
         else:
             return web.Response(text="Not found.", status=404)
 
