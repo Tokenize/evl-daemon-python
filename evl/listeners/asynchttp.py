@@ -67,10 +67,10 @@ class AsyncHttpListener:
 
     def _events(self) -> web.Response:
         storage = self.event_manager.storage.get(self.storage, None)
-        if storage:
+
+        events = []
+        if storage is not None:
             events = storage.all()
-        else:
-            events = []
 
         content = json.dumps(events, cls=EvlJsonSerializer)
         return web.Response(text=content, content_type="application/json")
