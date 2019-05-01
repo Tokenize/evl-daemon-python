@@ -2,7 +2,6 @@ import argparse
 import asyncio
 import logging
 import logging.config
-import signal
 import socket
 
 import evl.config as conf
