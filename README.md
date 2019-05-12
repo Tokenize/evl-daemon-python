@@ -2,7 +2,7 @@
 
 **A cross-plaform Python API and daemon for the Envisalink TPI (DSC) module**
 
-**Requirements:** Python >= 3.5 and packages found in requirements.txt file.
+**Requirements:** Python >= 3.7 and packages found in Pipfile & Pipfile.lock.
 
 **Note:** This version is a work in progress and may not be entirely stable and bug-free.
 But it shouldn't melt your system, so there's that.
