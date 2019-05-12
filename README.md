@@ -1,4 +1,4 @@
-# EvlDaemon
+# EvlDaemon [![Build Status](https://travis-ci.org/Tokenize/evl-daemon-python.png)](https://travis-ci.org/Tokenize/evl-daemon-python)
 
 **A cross-plaform Python API and daemon for the Envisalink TPI (DSC) module**
 
