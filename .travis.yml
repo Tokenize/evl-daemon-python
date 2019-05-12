@@ -6,4 +6,4 @@ install:
   - pip3 install pipenv
   - pipenv install
 script:
-  - pytest
+  - python -m unittest discover test
