@@ -5,7 +5,9 @@ from evl.event import Event
 
 
 class ConsoleNotifier:
-    def __init__(self, priority: Priority=Priority.LOW, layout: str=None, name: str=None):
+    def __init__(
+        self, priority: Priority = Priority.LOW, layout: str = None, name: str = None
+    ):
         self.priority = priority
         self.layout = layout
         self.name = name
@@ -19,7 +21,12 @@ class ConsoleNotifier:
     def __str__(self):
         return self.name
 
-    def notify(self, event: Event):
+    async def notify(self, event: Event):
         if event.priority.value >= self.priority.value:
-            print(self.layout.format(timestamp=event.timestamp_str(),
-                                     event=event, priority=event.priority))
+            print(
+                self.layout.format(
+                    timestamp=event.timestamp_str(),
+                    event=event,
+                    priority=event.priority,
+                )
+            )

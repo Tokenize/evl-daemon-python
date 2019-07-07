@@ -11,9 +11,16 @@ logger = logging.getLogger(__name__)
 
 
 class EmailNotifier:
-    def __init__(self, api_key: str, sender: str, recipient: str,
-                 priority: Priority=Priority.CRITICAL, layout: str=None,
-                 subject: str=None, name: str=None):
+    def __init__(
+        self,
+        api_key: str,
+        sender: str,
+        recipient: str,
+        priority: Priority = Priority.CRITICAL,
+        layout: str = None,
+        subject: str = None,
+        name: str = None,
+    ):
 
         self.api_key = api_key
         self.sender = Email(sender)
@@ -37,18 +44,21 @@ class EmailNotifier:
     def __str__(self):
         return self.name
 
-    def notify(self, event: Event):
+    async def notify(self, event: Event):
         if event.priority.value >= self.priority.value:
             self._send_email(event)
 
     def _send_email(self, event: Event):
-        message = self.layout.format(timestamp=event.timestamp_str(),
-                                     priority=event.priority,
-                                     event=event)
+        message = self.layout.format(
+            timestamp=event.timestamp_str(), priority=event.priority, event=event
+        )
         body = Content(type_="text/plain", value=message)
         mail = Mail(self.sender, self.subject, self.recipient, body)
         response = self.client.client.mail.send.post(request_body=mail.get())
 
         if response.status_code not in (200, 202):
-            logger.error("Unable to send email! ({status_code} - {message})".format(
-                status_code=response.status_code, message=response.body))
+            logger.error(
+                "Unable to send email! ({status_code} - {message})".format(
+                    status_code=response.status_code, message=response.body
+                )
+            )

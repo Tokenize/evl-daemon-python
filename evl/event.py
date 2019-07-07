@@ -19,12 +19,11 @@ class Event:
     def __init__(self, command: cmd.Command, data: dict, timestamp=None):
         self.command = command
 
-        self.data = data.get('data', None)
-        self.zone = data.get('zone', None)
-        self.partition = data.get('partition', None)
+        self.data = data.get("data", None)
+        self.zone = data.get("zone", None)
+        self.partition = data.get("partition", None)
 
-        self.priority = cmd.PRIORITIES.get(command.command_type,
-                                           cmd.Priority.LOW)
+        self.priority = cmd.PRIORITIES.get(command.command_type, cmd.Priority.LOW)
 
         if timestamp is None:
             timestamp = int(time.time())
@@ -38,8 +37,7 @@ class Event:
 
         if self.zone is None:
             return ""
-        return EventManager.zones.get(
-            self.zone, "Zone {zone}".format(zone=self.zone))
+        return EventManager.zones.get(self.zone, "Zone {zone}".format(zone=self.zone))
 
     def partition_name(self) -> str:
         """
@@ -50,8 +48,8 @@ class Event:
         if self.partition is None:
             return ""
         return EventManager.partitions.get(
-            self.partition,
-            "Partition {partition}".format(partition=self.partition))
+            self.partition, "Partition {partition}".format(partition=self.partition)
+        )
 
     def describe(self) -> str:
         """
@@ -60,8 +58,9 @@ class Event:
         """
 
         cmd_desc = self.command.describe()
-        description = "{command}: {data}".format(command=cmd_desc,
-                                                 data=self.describe_data())
+        description = "{command}: {data}".format(
+            command=cmd_desc, data=self.describe_data()
+        )
 
         return description
 
@@ -72,8 +71,10 @@ class Event:
         """
 
         command_type = self.command.command_type
-        if command_type in (cmd.CommandType.KEYPAD_LED_FLASH_STATE,
-                            cmd.CommandType.KEYPAD_LED_STATE):
+        if command_type in (
+            cmd.CommandType.KEYPAD_LED_FLASH_STATE,
+            cmd.CommandType.KEYPAD_LED_STATE,
+        ):
             return dt.describe_led_state(self.data)
 
         elif command_type in cmd.LOGIN_COMMANDS:
@@ -84,8 +85,8 @@ class Event:
             armed_type = dt.PartitionArmedType(self.data)
             armed_name = dt.PARTITION_ARMED_NAMES[armed_type]
             return "({armed_name}: [{partition}]".format(
-                armed_name=armed_name,
-                partition=self.partition_name())
+                armed_name=armed_name, partition=self.partition_name()
+            )
 
         # General command types
         elif command_type in cmd.PARTITION_COMMANDS:
@@ -93,8 +94,8 @@ class Event:
 
         elif command_type in cmd.PARTITION_AND_ZONE_COMMANDS:
             return "[{partition}] {zone}".format(
-                partition=self.partition_name(),
-                zone=self.zone_name())
+                partition=self.partition_name(), zone=self.zone_name()
+            )
 
         elif command_type in cmd.ZONE_COMMANDS:
             return self.zone_name()
@@ -108,8 +109,7 @@ class Event:
         :return: Formatted date string
         """
 
-        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
-            self.timestamp))
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.timestamp))
 
     def __str__(self) -> str:
         """
@@ -139,7 +139,7 @@ class Status:
 
         self.last_event = None
 
-        self.connection = {'hostname': '', 'port': 0}
+        self.connection = {"hostname": "", "port": 0}
 
     def update(self, event: Event) -> None:
         """
@@ -154,8 +154,10 @@ class Status:
             self.zones[event.zone] = event.describe()
 
         command_type = event.command.command_type
-        if command_type in (cmd.CommandType.PARTITION_DISARMED,
-                            cmd.CommandType.PARTITION_ARMED):
+        if command_type in (
+            cmd.CommandType.PARTITION_DISARMED,
+            cmd.CommandType.PARTITION_ARMED,
+        ):
             self.armed_state[event.partition] = event.describe()
 
         self.last_event = event
@@ -168,26 +170,24 @@ class Status:
 
         uptime = datetime.now() - self.started_at
 
-        last_event = ''
+        last_event = ""
         if self.last_event:
             last_event = "[{timestamp}] {description}".format(
                 timestamp=self.last_event.timestamp_str(),
-                description=self.last_event.describe())
+                description=self.last_event.describe(),
+            )
 
         return {
-            'statuses': {
-                'zones': self.zones,
-                'partitions': self.partitions
-            },
-            'armed_state': self.armed_state,
-            'connection': self.connection,
-            'last_event': last_event,
-            'listeners': [str(l) for l in self.listeners],
-            'notifiers': [str(n) for _, n in self.notifiers.items()],
-            'partitions': util.describe_dict(EventManager.partitions),
-            'storage': [str(s) for _, s in self.storage.items()],
-            'uptime': uptime.total_seconds(),
-            'zones': util.describe_dict(EventManager.zones)
+            "statuses": {"zones": self.zones, "partitions": self.partitions},
+            "armed_state": self.armed_state,
+            "connection": self.connection,
+            "last_event": last_event,
+            "listeners": [str(l) for l in self.listeners],
+            "notifiers": [str(n) for _, n in self.notifiers.items()],
+            "partitions": util.describe_dict(EventManager.partitions),
+            "storage": [str(s) for _, s in self.storage.items()],
+            "uptime": uptime.total_seconds(),
+            "zones": util.describe_dict(EventManager.zones),
         }
 
 
@@ -200,11 +200,13 @@ class EventManager:
     partitions = {}
     zones = {}
 
-    def __init__(self,
-                 event_queue,
-                 notifiers: dict = None,
-                 storage: dict = None,
-                 status: Status = None):
+    def __init__(
+        self,
+        event_queue,
+        notifiers: dict = None,
+        storage: dict = None,
+        status: Status = None,
+    ):
 
         if notifiers is None:
             notifiers = {}
@@ -278,8 +280,10 @@ class EventManager:
                 notifier = self._notifiers.get(notifier_key, None)
                 if notifier:
                     try:
-                        notifier.notify(event)
+                        await notifier.notify(event)
                     except Exception as e:
                         logger.error(
                             "Error notifying on {name}: {exception}".format(
-                                name=notifier, exception=e))
+                                name=notifier, exception=e
+                            )
+                        )
