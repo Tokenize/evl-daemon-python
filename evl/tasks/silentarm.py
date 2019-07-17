@@ -12,17 +12,19 @@ class SilentArmTask:
     command occurs on a given zone.
     """
 
-    def __init__(self, event_manager: ev.EventManager, partitions: list,
-                 zones: list):
+    def __init__(self, event_manager: ev.EventManager, partitions: list, zones: list):
         self.event_manager = event_manager
         self.partitions = partitions
         self.zones = zones
 
-        self.alarm_triggers = (cmd.CommandType.ZONE_OPEN, )
+        self.alarm_triggers = (cmd.CommandType.ZONE_OPEN,)
         self.shutdown_triggers = (
             cmd.CommandType.PARTITION_ARMED,
             cmd.CommandType.SYSTEM_ARMING_IN_PROGRESS,
         )
+
+    def __str__(self):
+        return "Silent Arm Task"
 
     def start(self) -> None:
         """
@@ -30,7 +32,7 @@ class SilentArmTask:
         list of notifiers.
         """
         logger.debug("Starting silent-arm task")
-        self.event_manager.add_notifiers({'silent-arm': self})
+        self.event_manager.add_notifiers({"silent-arm": self})
 
     def stop(self) -> None:
         """
@@ -38,9 +40,9 @@ class SilentArmTask:
         list of notifiers.
         """
         logger.debug("Stopping silent arm task")
-        self.event_manager.remove_notifier('silent-arm')
+        self.event_manager.remove_notifier("silent-arm")
 
-    def notify(self, event: ev.Event) -> None:
+    async def notify(self, event: ev.Event) -> None:
         """
         Event notifier that triggers an alarm if the given event is in the
         list of alarm triggers or shuts down the silent alarm task if the event
@@ -48,11 +50,11 @@ class SilentArmTask:
         :param event: Event sent from EVL device
         """
         if event.command.command_type in self.alarm_triggers:
-            self._alarm(event)
+            await self._alarm(event)
         elif event.command.command_type in self.shutdown_triggers:
             self._shutdown(event)
 
-    def _alarm(self, event: ev.Event) -> None:
+    async def _alarm(self, event: ev.Event) -> None:
         """
         Sends a Software Zone Alarm event to the event manager queue if the
         given event zone is in the list of alarm zones.
@@ -66,7 +68,7 @@ class SilentArmTask:
         logger.debug("Silent alarm task triggered")
         command = cmd.Command(cmd.CommandType.SOFTWARE_ZONE_ALARM.value)
         data = "{zone}".format(zone=event.zone)
-        self.event_manager.enqueue(command, data)
+        await self.event_manager.enqueue(command, data)
 
     def _shutdown(self, event: ev.Event) -> None:
         """

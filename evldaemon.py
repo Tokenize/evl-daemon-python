@@ -1,12 +1,8 @@
 import argparse
+import asyncio
 import logging
 import logging.config
-import signal
 import socket
-
-import gevent.pool
-import gevent.queue
-import gevent.signal
 
 import evl.config as conf
 import evl.connection as conn
@@ -29,9 +25,7 @@ class EvlDaemon:
             config = {}
         self.config = config
 
-        self.greenlet_group = gevent.pool.Group()
-        self.event_queue = gevent.queue.Queue()
-
+        self.event_queue = asyncio.Queue()
         self.status = ev.Status()
 
         # Assign zone and partition names as read from configuration file.
@@ -41,7 +35,7 @@ class EvlDaemon:
         # TODO: Read command name, priority, login name, etc. overrides from config.
 
         self.event_manager = ev.EventManager(
-            self.event_queue, self.greenlet_group, status=self.status)
+            self.event_queue, status=self.status)
 
         self.notifiers = conf.load_notifiers(self.config.get('notifiers', {}))
         self.event_manager.add_notifiers(self.notifiers)
@@ -52,15 +46,12 @@ class EvlDaemon:
         self.listeners = conf.load_listeners(
             self.config.get('listeners', []), self.event_manager)
         self.status.listeners = self.listeners
-        for listener in self.listeners:
-            self.greenlet_group.spawn(listener.listen)
 
-    def start(self):
+    async def start(self):
         logger.debug("Starting daemon...")
         resolved = socket.gethostbyname(self.host)
         self.connection = conn.Connection(
             event_manager=self.event_manager,
-            queue_group=self.greenlet_group,
             host=resolved,
             password=self.password)
 
@@ -69,15 +60,15 @@ class EvlDaemon:
             'port': self.connection.port
         }
 
-        gevent.signal(signal.SIGINT, self.stop)
-
-        self.connection.start()
-        self.greenlet_group.join()
+        await asyncio.gather(
+            self.connection.start(),
+            self.event_manager.wait(),
+            *[listener.listen() for listener in self.listeners]
+        )
 
     def stop(self):
         logger.debug("Stopping daemon...")
         self.connection.stop()
-        self.greenlet_group.kill()
         logger.debug("Daemon stopped.")
 
 
@@ -109,7 +100,13 @@ def main():
     port = config.get('port', 4025)
 
     ed = EvlDaemon(host, password, port, config)
-    ed.start()
+    loop = asyncio.get_event_loop()
+
+    try:
+        loop.run_until_complete(ed.start())
+    except KeyboardInterrupt:
+        logger.debug("Ctrl+C pressed, stopping...")
+        ed.stop()
 
 
 if __name__ == '__main__':
