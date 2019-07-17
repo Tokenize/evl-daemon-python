@@ -1,7 +1,6 @@
 import logging
-from time import localtime, strftime
 
-from sendgrid import Email, SendGridAPIClient
+from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Content, Mail
 
 from evl.command import Priority
@@ -23,8 +22,8 @@ class EmailNotifier:
     ):
 
         self.api_key = api_key
-        self.sender = Email(sender)
-        self.recipient = Email(recipient)
+        self.sender = sender
+        self.recipient = recipient
         self.priority = priority
         self.layout = layout
         self.subject = subject
@@ -39,7 +38,7 @@ class EmailNotifier:
         if name is None:
             self.name = "Email Notifier"
 
-        self.client = SendGridAPIClient(apikey=self.api_key)
+        self.client = SendGridAPIClient(api_key=self.api_key)
 
     def __str__(self):
         return self.name
@@ -52,8 +51,13 @@ class EmailNotifier:
         message = self.layout.format(
             timestamp=event.timestamp_str(), priority=event.priority, event=event
         )
-        body = Content(type_="text/plain", value=message)
-        mail = Mail(self.sender, self.subject, self.recipient, body)
+        body = Content(mime_type="text/plain", content=message)
+        mail = Mail(
+            from_email=self.sender,
+            to_emails=self.recipient,
+            subject=self.subject,
+            plain_text_content=body,
+        )
         response = self.client.client.mail.send.post(request_body=mail.get())
 
         if response.status_code not in (200, 202):
