@@ -1,4 +1,4 @@
-def merge_dicts(default: dict, overrides: dict=None) -> dict:
+def merge_dicts(default: dict, overrides: dict = None) -> dict:
     """
     Merge given default dictionary of values with given overrides.
     :param default: Default dictionary of values
@@ -17,4 +17,4 @@ def describe_dict(d: dict) -> list:
     :param d: Dictionary to describe
     :return: List of name, number dicts
     """
-    return [{'name': name, 'number': number} for number, name in d.items()]
+    return [{"name": name, "number": number} for number, name in d.items()]

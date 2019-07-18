@@ -4,7 +4,6 @@ from evl import tpi
 
 
 class TestTpi(unittest.TestCase):
-
     def test_checksum_is_correct(self):
         checksum = tpi.calculate_checksum("6543")
         self.assertEqual(checksum, "D2")

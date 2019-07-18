@@ -15,8 +15,14 @@ class Connection:
     EVL, sending and receiving data, and processing incoming commands as
     appropriate.
     """
-    def __init__(self, event_manager: ev.EventManager, host: str,
-                 port: int=4025, password: str=""):
+
+    def __init__(
+        self,
+        event_manager: ev.EventManager,
+        host: str,
+        port: int = 4025,
+        password: str = "",
+    ):
 
         self.host = host
         self.port = port
@@ -38,16 +44,14 @@ class Connection:
         """
         await self._connect()
 
-        await asyncio.gather(
-            self._receive(),
-            self._send(),
-            self._process()
-        )
+        await asyncio.gather(self._receive(), self._send(), self._process())
 
     async def _connect(self):
         """Initiates connection to the EVL device."""
         logger.debug("Connecting to EVL...")
-        (self._reader, self._writer) = await asyncio.open_connection(self.host, self.port)
+        (self._reader, self._writer) = await asyncio.open_connection(
+            self.host, self.port
+        )
 
     async def _receive(self):
         """
@@ -116,7 +120,10 @@ class Connection:
 
             command = cmd.Command(tpi.parse_command(event))
             data = tpi.parse_data(event)
-            if command.command_type == cmd.CommandType.LOGIN and dt.LoginType(data) == dt.LoginType.PASSWORD_REQUEST:
+            if (
+                command.command_type == cmd.CommandType.LOGIN
+                and dt.LoginType(data) == dt.LoginType.PASSWORD_REQUEST
+            ):
                 logger.debug("Logging in...")
                 await self.send(cmd.CommandType.NETWORK_LOGIN, self.password)
             elif command.command_type == cmd.CommandType.COMMAND_ACKNOWLEDGE:
@@ -129,7 +136,7 @@ class Connection:
         if self._writer is not None:
             self._writer.close()
 
-    async def send(self, command: cmd.CommandType, data: str= ""):
+    async def send(self, command: cmd.CommandType, data: str = ""):
         """
         Send the given command and data to the EVL device.
         :param command: CommandType to send
@@ -138,7 +145,6 @@ class Connection:
         command_str = command.value
         checksum = tpi.calculate_checksum(command_str + data)
         packet = "{command}{data}{checksum}\r\n".format(
-            command=command_str,
-            data=data,
-            checksum=checksum)
+            command=command_str, data=data, checksum=checksum
+        )
         await self._send_queue.put(packet)

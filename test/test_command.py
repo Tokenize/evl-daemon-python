@@ -5,7 +5,6 @@ import evl.util as util
 
 
 class CommandTest(unittest.TestCase):
-
     def test_command_describe_default(self):
         command = cmd.Command(cmd.CommandType.LOGIN.value)
         desc = cmd.NAMES[command.command_type]

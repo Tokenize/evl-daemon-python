@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class EvlJsonSerializer(flask.json.JSONEncoder):
-
     def default(self, o):
         if isinstance(o, ev.Event):
             event_json = {
@@ -22,8 +21,8 @@ class EvlJsonSerializer(flask.json.JSONEncoder):
                 "timestamp": o.timestamp,
                 "description": {
                     "data": o.describe_data(),
-                    "command": o.command.describe()
-                }
+                    "command": o.command.describe(),
+                },
             }
             return event_json
         elif isinstance(o, cmd.Command):
@@ -39,8 +38,14 @@ class EvlJsonSerializer(flask.json.JSONEncoder):
 class HttpListener:
     """A listener that listens for HTTP commands on the given port."""
 
-    def __init__(self, name: str, port: int, auth_token: str,
-                 event_manager: ev.EventManager, storage: str = ""):
+    def __init__(
+        self,
+        name: str,
+        port: int,
+        auth_token: str,
+        event_manager: ev.EventManager,
+        storage: str = "",
+    ):
         self.app = flask.Flask(__name__)
         self.app.json_encoder = EvlJsonSerializer
 
@@ -52,11 +57,13 @@ class HttpListener:
 
         self.current_tasks = {}
 
-        self.app.add_url_rule('/events', '/events', self.get_events)
-        self.app.add_url_rule('/status_report', '/status_report',
-                              self.get_status_report)
+        self.app.add_url_rule("/events", "/events", self.get_events)
         self.app.add_url_rule(
-            '/tasks', '/tasks', self.do_tasks, methods=['POST', 'DELETE'])
+            "/status_report", "/status_report", self.get_status_report
+        )
+        self.app.add_url_rule(
+            "/tasks", "/tasks", self.do_tasks, methods=["POST", "DELETE"]
+        )
 
     def __str__(self):
         """Returns s string representation of the HTTP listener."""
@@ -69,7 +76,7 @@ class HttpListener:
         and aborts with a 403 Unauthorized response if they do not match.
         """
 
-        auth_token = flask.request.args.get('auth_token')
+        auth_token = flask.request.args.get("auth_token")
         if auth_token != self.auth_token:
             flask.abort(403)
 
@@ -77,7 +84,7 @@ class HttpListener:
         """Starts the HTTP listener."""
 
         logger.debug("Starting HTTP listener...")
-        server = wsgi.WSGIServer(('', self.port), self.app)
+        server = wsgi.WSGIServer(("", self.port), self.app)
         server.serve_forever()
 
     def get_events(self) -> flask.Response:
@@ -111,12 +118,12 @@ class HttpListener:
         self._authorize()
         task = flask.request.get_json()
 
-        if not 'type' in task:
+        if not "type" in task:
             flask.abort(400)
 
-        if flask.request.method == 'POST':
+        if flask.request.method == "POST":
             return flask.jsonify(self._create_task(task))
-        elif flask.request.method == 'DELETE':
+        elif flask.request.method == "DELETE":
             return flask.jsonify(self._delete_task(task))
 
     def _create_task(self, task: dict) -> str:
@@ -126,7 +133,7 @@ class HttpListener:
         :returns: Result of creating the given task
         """
 
-        if task['type'] == 'silent_arm':
+        if task["type"] == "silent_arm":
             return self._create_silent_arm(task)
         else:
             flask.abort(400)
@@ -138,12 +145,12 @@ class HttpListener:
         :returns: Result of deleting the given task
         """
 
-        if task['type'] == 'silent_arm':
-            silent_arm = self.current_tasks.get('silent-arm', None)
+        if task["type"] == "silent_arm":
+            silent_arm = self.current_tasks.get("silent-arm", None)
             if not silent_arm:
                 flask.abort(400)
             silent_arm.stop()
-            del self.current_tasks['silent-arm']
+            del self.current_tasks["silent-arm"]
             return "silent-arm task deleted"
         else:
             flask.abort(400)
@@ -154,16 +161,15 @@ class HttpListener:
         :param: Silent alarm task details
         :returns: Result of creating silent alarm task
         """
-        
-        if self.current_tasks.get('silent-arm', None):
+
+        if self.current_tasks.get("silent-arm", None):
             flask.abort(400)
 
-        zones = task.get('zones', [])
-        partitions = task.get('partitions', [])
+        zones = task.get("zones", [])
+        partitions = task.get("partitions", [])
 
-        silentarm_task = silentarm.SilentArmTask(self.event_manager,
-                                                 partitions, zones)
-        self.current_tasks['silent-arm'] = silentarm_task
+        silentarm_task = silentarm.SilentArmTask(self.event_manager, partitions, zones)
+        self.current_tasks["silent-arm"] = silentarm_task
         silentarm_task.start()
 
         return "silent-arm task created"

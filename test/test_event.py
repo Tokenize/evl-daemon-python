@@ -6,7 +6,6 @@ import evl.util as util
 
 
 class TestEventManager(unittest.TestCase):
-
     def test_event_priority_override(self):
         cmd_priorities = {cmd.CommandType.LOGIN: cmd.Priority.CRITICAL}
         cmd.PRIORITIES = util.merge_dicts(cmd.PRIORITIES, cmd_priorities)

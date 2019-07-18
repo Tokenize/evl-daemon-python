@@ -19,15 +19,16 @@ logger = logging.getLogger(__name__)
 def load_listeners(config: list, event_manager) -> list:
     listeners = []
     for listener in config:
-        name = listener.get('name')
-        kind = listener['type']
+        name = listener.get("name")
+        kind = listener["type"]
 
-        if kind == 'http':
-            settings = listener.get('settings')
-            port = int(settings.get('port', 5204))
-            auth_token = settings.get('auth_token', '')
-            new_listener = http.AsyncHttpListener(name, port, auth_token,
-                                                  event_manager, 'memory')
+        if kind == "http":
+            settings = listener.get("settings")
+            port = int(settings.get("port", 5204))
+            auth_token = settings.get("auth_token", "")
+            new_listener = http.AsyncHttpListener(
+                name, port, auth_token, event_manager, "memory"
+            )
 
         else:
             new_listener = None
@@ -46,27 +47,29 @@ def load_logging(config: list) -> dict:
     :return dict: Logging configuration dictionary
     """
 
-    log_config = {'version': 1, 'handlers': {}, 'loggers': {},
-                  'root': {'level': logging.NOTSET}}
+    log_config = {
+        "version": 1,
+        "handlers": {},
+        "loggers": {},
+        "root": {"level": logging.NOTSET},
+    }
 
     handlers = []
     for new_logger in config:
-        priority = new_logger.get('level', 'INFO')
-        name = new_logger['name']
-        kind = new_logger['type']
+        priority = new_logger.get("level", "INFO")
+        name = new_logger["name"]
+        kind = new_logger["type"]
 
-        if kind == 'console':
-            log_config['handlers'][name] = {
-                'class': 'logging.StreamHandler',
-                'level': priority,
-                'stream': sys.stderr
+        if kind == "console":
+            log_config["handlers"][name] = {
+                "class": "logging.StreamHandler",
+                "level": priority,
+                "stream": sys.stderr,
             }
             handlers.append(name)
 
     if handlers:
-        log_config['loggers']['evl'] = {
-            'handlers': handlers
-        }
+        log_config["loggers"]["evl"] = {"handlers": handlers}
 
     return log_config
 
@@ -78,30 +81,32 @@ def load_notifiers(config: list) -> dict:
     """
     notifiers = {}
     for notifier in config:
-        priority = cmd.Priority[notifier.get('priority', 'LOW').upper()]
-        name = notifier.get('name')
-        kind = notifier['type']
+        priority = cmd.Priority[notifier.get("priority", "LOW").upper()]
+        name = notifier.get("name")
+        kind = notifier["type"]
 
-        if kind == 'console':
+        if kind == "console":
             new_notifier = console.ConsoleNotifier(priority=priority, name=name)
-        elif kind == 'sms':
-            layout = notifier.get('layout')
-            settings = notifier.get('settings')
-            sender = settings.get('sender')
-            recipient = settings.get('recipient')
-            sid = settings.get('sid')
-            auth_token = settings.get('authToken')
-            new_notifier = sms.SmsNotifier(sid, auth_token, sender, recipient,
-                                           priority, layout, name)
-        elif kind == 'email':
-            layout = notifier.get('layout')
-            settings = notifier.get('settings')
-            sender = settings.get('sender')
-            recipient = settings.get('recipient')
-            api_key = settings.get('apiKey')
-            subject = settings.get('subject')
-            new_notifier = email.EmailNotifier(api_key, sender, recipient, priority,
-                                               layout, subject, name)
+        elif kind == "sms":
+            layout = notifier.get("layout")
+            settings = notifier.get("settings")
+            sender = settings.get("sender")
+            recipient = settings.get("recipient")
+            sid = settings.get("sid")
+            auth_token = settings.get("authToken")
+            new_notifier = sms.SmsNotifier(
+                sid, auth_token, sender, recipient, priority, layout, name
+            )
+        elif kind == "email":
+            layout = notifier.get("layout")
+            settings = notifier.get("settings")
+            sender = settings.get("sender")
+            recipient = settings.get("recipient")
+            api_key = settings.get("apiKey")
+            subject = settings.get("subject")
+            new_notifier = email.EmailNotifier(
+                api_key, sender, recipient, priority, layout, subject, name
+            )
         else:
             new_notifier = None
 
@@ -118,11 +123,11 @@ def load_storage(config: list) -> dict:
     """
     storages = {}
     for storage in config:
-        kind = storage['type']
+        kind = storage["type"]
         # Set up storage engines defined in configuration file
-        if kind == 'memory':
-            max_size = storage.get('maxSize', DEFAULT_STORAGE_MAX_LENGTH)
-            name = storage.get('name', 'memory')
+        if kind == "memory":
+            max_size = storage.get("maxSize", DEFAULT_STORAGE_MAX_LENGTH)
+            name = storage.get("name", "memory")
             new_storage = memory.MemoryStorage(size=max_size, name=name)
         else:
             new_storage = None

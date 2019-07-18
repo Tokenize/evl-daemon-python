@@ -8,13 +8,11 @@ import evl.config as conf
 import evl.connection as conn
 import evl.event as ev
 
-logger = logging.getLogger('evl')
+logger = logging.getLogger("evl")
 
 
 class EvlDaemon:
-
-    def __init__(self, host: str, password: str, port: int,
-                 config: dict = None):
+    def __init__(self, host: str, password: str, port: int, config: dict = None):
 
         self.host = host
         self.password = password
@@ -29,36 +27,32 @@ class EvlDaemon:
         self.status = ev.Status()
 
         # Assign zone and partition names as read from configuration file.
-        ev.EventManager.zones = self.config.get('zones', {})
-        ev.EventManager.partitions = self.config.get('partitions', {})
+        ev.EventManager.zones = self.config.get("zones", {})
+        ev.EventManager.partitions = self.config.get("partitions", {})
 
         # TODO: Read command name, priority, login name, etc. overrides from config.
 
-        self.event_manager = ev.EventManager(
-            self.event_queue, status=self.status)
+        self.event_manager = ev.EventManager(self.event_queue, status=self.status)
 
-        self.notifiers = conf.load_notifiers(self.config.get('notifiers', {}))
+        self.notifiers = conf.load_notifiers(self.config.get("notifiers", {}))
         self.event_manager.add_notifiers(self.notifiers)
 
-        self.storage = conf.load_storage(self.config.get('storage', {}))
+        self.storage = conf.load_storage(self.config.get("storage", {}))
         self.event_manager.add_storages(self.storage)
 
         self.listeners = conf.load_listeners(
-            self.config.get('listeners', []), self.event_manager)
+            self.config.get("listeners", []), self.event_manager
+        )
         self.status.listeners = self.listeners
 
     async def start(self):
         logger.debug("Starting daemon...")
         resolved = socket.gethostbyname(self.host)
         self.connection = conn.Connection(
-            event_manager=self.event_manager,
-            host=resolved,
-            password=self.password)
+            event_manager=self.event_manager, host=resolved, password=self.password
+        )
 
-        self.status.connection = {
-            'hostname': resolved,
-            'port': self.connection.port
-        }
+        self.status.connection = {"hostname": resolved, "port": self.connection.port}
 
         await asyncio.gather(
             self.connection.start(),
@@ -76,7 +70,8 @@ def main():
     print("Welcome to EvlDaemon.")
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-c', '--config', required=False, default="~/.evldaemon/config.json")
+        "-c", "--config", required=False, default="~/.evldaemon/config.json"
+    )
     options = parser.parse_args()
     config = conf.read(options.config)
 
@@ -84,20 +79,20 @@ def main():
         print("Unable to read configuration file. Exiting.")
         exit(1)
 
-    logging_config = conf.load_logging(config.get('logging', []))
+    logging_config = conf.load_logging(config.get("logging", []))
     logging.config.dictConfig(logging_config)
 
-    host = config.get('ip')
+    host = config.get("ip")
     if host is None:
         print("IP address not found in configuration file!")
         exit(1)
 
-    password = config.get('password')
+    password = config.get("password")
     if password is None:
         print("Password not found in configuration file!")
         exit(1)
 
-    port = config.get('port', 4025)
+    port = config.get("port", 4025)
 
     ed = EvlDaemon(host, password, port, config)
     loop = asyncio.get_event_loop()
@@ -109,5 +104,5 @@ def main():
         ed.stop()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

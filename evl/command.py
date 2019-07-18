@@ -183,7 +183,7 @@ NAMES = {
     CommandType.COMMAND_OUTPUT_PRESSED: "Command Output Pressed",
     CommandType.MASTER_CODE_REQUIRED: "Master Code Required",
     CommandType.INSTALLERS_CODE_REQUIRED: "Installers Code Required",
-    CommandType.SOFTWARE_ZONE_ALARM: "Software Zone Alarm"
+    CommandType.SOFTWARE_ZONE_ALARM: "Software Zone Alarm",
 }
 
 # Priorities are Priority.LOW by default. Only commands that are higher priority
@@ -239,9 +239,7 @@ PRIORITIES = {
     CommandType.SOFTWARE_ZONE_ALARM: Priority.HIGH,
 }
 
-LOGIN_COMMANDS = {
-    CommandType.LOGIN
-}
+LOGIN_COMMANDS = {CommandType.LOGIN}
 
 PARTITION_COMMANDS = {
     CommandType.PARTITION_READY,
@@ -285,4 +283,3 @@ ZONE_COMMANDS = {
     CommandType.ZONE_RESTORED,
     CommandType.SOFTWARE_ZONE_ALARM,
 }
-
