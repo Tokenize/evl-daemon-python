@@ -60,7 +60,13 @@ class EmailNotifier:
         )
         response = self.client.client.mail.send.post(request_body=mail.get())
 
-        if response.status_code not in (200, 202):
+        if response.status_code in (200, 202):
+            logger.debug(
+                "Notification email sent to {recipient}.".format(
+                    recipient=self.recipient
+                )
+            )
+        else:
             logger.error(
                 "Unable to send email! ({status_code} - {message})".format(
                     status_code=response.status_code, message=response.body
