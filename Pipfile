@@ -6,17 +6,6 @@ name = "pypi"
 [packages]
 twilio = "*"
 sendgrid = "*"
-astroid = "*"
-coverage = "*"
-gevent = "*"
-greenlet = "*"
-isort = "*"
-lazy-object-proxy = "*"
-mccabe = "*"
-pylint = "*"
-six = "*"
-wrapt = "*"
-Flask = "*"
 aiohttp = "*"
 
 [dev-packages]
