@@ -118,7 +118,7 @@ class HttpListener:
         self._authorize()
         task = flask.request.get_json()
 
-        if not "type" in task:
+        if "type" not in task:
             flask.abort(400)
 
         if flask.request.method == "POST":
