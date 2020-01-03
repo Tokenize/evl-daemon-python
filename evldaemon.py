@@ -39,6 +39,7 @@ class EvlDaemon:
 
         self.storage = conf.load_storage(self.config.get("storage", {}))
         self.event_manager.add_storages(self.storage)
+        self.heartbeats = conf.load_heartbeats(self.config.get("heartbeats", {}))
 
         self.listeners = conf.load_listeners(
             self.config.get("listeners", []), self.event_manager
@@ -57,7 +58,8 @@ class EvlDaemon:
         await asyncio.gather(
             self.connection.start(),
             self.event_manager.wait(),
-            *[listener.listen() for listener in self.listeners]
+            *[listener.listen() for listener in self.listeners],
+            *[heartbeat.start() for heartbeat in self.heartbeats]
         )
 
     def stop(self):
