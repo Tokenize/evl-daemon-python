@@ -9,11 +9,30 @@ import evl.notifiers.consolenotifier as console
 import evl.notifiers.smsnotifier as sms
 import evl.notifiers.emailnotifier as email
 import evl.storage.memory as memory
+import evl.tasks.heartbeat as heartbeat
 
 
 DEFAULT_STORAGE_MAX_LENGTH = 100
 
 logger = logging.getLogger(__name__)
+
+
+def load_heartbeats(config: list) -> list:
+    heartbeats = []
+    for hb in config:
+        name = hb.get("name")
+        url = hb.get("url")
+        device_uuid = (hb.get("device_uuid"),)
+        device_id = hb.get("device_id")
+        auth_token = hb.get("auth_token", "")
+        interval = hb.get("interval", 60)
+
+        new_heartbeat = heartbeat.HeartbeatTask(
+            name, device_id, device_uuid, interval, url, auth_token
+        )
+        heartbeats.append(new_heartbeat)
+
+    return heartbeats
 
 
 def load_listeners(config: list, event_manager) -> list:

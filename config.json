@@ -2,7 +2,6 @@
     "ip": "127.0.0.1",
     "port": "4025",
     "password": "SECRET",
-
     "zones": {
         "001": "Front Door",
         "002": "Garage Door",
@@ -13,11 +12,9 @@
         "007": "Basement Window",
         "008": "Motion Sensor"
     },
-
     "partitions": {
         "1": "Main"
     },
-
     "logging": [
         {
             "name": "console",
@@ -25,7 +22,16 @@
             "level": "DEBUG"
         }
     ],
-
+    "heartbeats": [
+        {
+            "name": "primary",
+            "device_id": "1",
+            "device_uuid": "uuid",
+            "interval": "60",
+            "url": "http://localhost:3000/api/devices",
+            "auth_token": "SECRET"
+        }
+    ],
     "listeners": [
         {
             "name": "http",
@@ -36,7 +42,6 @@
             }
         }
     ],
-
     "storage": [
         {
             "name": "memory",
@@ -46,7 +51,6 @@
             }
         }
     ],
-
     "notifiers": [
         {
             "name": "console",
