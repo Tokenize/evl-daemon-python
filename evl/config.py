@@ -8,6 +8,7 @@ import evl.listeners.asynchttp as http
 import evl.notifiers.consolenotifier as console
 import evl.notifiers.smsnotifier as sms
 import evl.notifiers.emailnotifier as email
+import evl.notifiers.mimirnotifier as mimir
 import evl.storage.memory as memory
 import evl.tasks.heartbeat as heartbeat
 
@@ -125,6 +126,15 @@ def load_notifiers(config: list) -> dict:
             subject = settings.get("subject")
             new_notifier = email.EmailNotifier(
                 api_key, sender, recipient, priority, layout, subject, name
+            )
+        elif kind == "mimir":
+            layout = notifier.get("layout")
+            settings = notifier.get("settings")
+            auth_token = settings.get("auth_token")
+            device_uuid = settings.get("device_uuid")
+            url = settings.get("url")
+            new_notifier = mimir.MimirNotifier(
+                url, device_uuid, auth_token, priority, layout, name
             )
         else:
             new_notifier = None
