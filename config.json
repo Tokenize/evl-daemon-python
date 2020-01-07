@@ -58,6 +58,16 @@
             "priority": "Low"
         },
         {
+            "name": "mimir",
+            "type": "mimir",
+            "priority": "Low",
+            "settings": {
+                "auth_token": "auth token",
+                "device_uuid": "uuid",
+                "url": "http://localhost:3000/api/events"
+            }
+        },
+        {
             "name": "sms",
             "type": "sms",
             "priority": "High",
