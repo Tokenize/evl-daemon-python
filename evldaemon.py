@@ -72,7 +72,7 @@ def main():
     print("Welcome to EvlDaemon.")
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-c", "--config", required=False, default="~/.evldaemon/config.json"
+        "-c", "--config", required=False, default="~/.config/evl_daemon/config.json"
     )
     options = parser.parse_args()
     config = conf.read(options.config)
