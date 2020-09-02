@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "evl-daemon-python"
+version = "0.1.0"
+description = "A cross-platform API and daemon for the Envisalink TPI (DSC) module."
+authors = ["Mike Farr <mike@tokenize.ca>"]
+license = "GPL-3.0-only"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+aiohttp = "^3.6"
+twilio = "^6.0"
+sendgrid = "^3.0"
+
+[tool.poetry.dev-dependencies]
+black = { version = "*", allow-prereleases = true }
+flake8 = "*"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
