@@ -4,6 +4,6 @@ python:
   - "3.7"
 install:
   - pip3 install poetry
-  - poetry install
+  - poetry install --no-dev
 script:
   - python -m unittest discover test
