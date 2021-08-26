@@ -3,6 +3,8 @@ import logging
 import os
 import sys
 
+from marshmallow import Schema, fields
+
 import evl.command as cmd
 import evl.listeners.asynchttp as http
 import evl.notifiers.consolenotifier as console
@@ -13,9 +15,71 @@ import evl.storage.memory as memory
 import evl.tasks.heartbeat as heartbeat
 
 
+DEFAULT_HEARTBEAT_INTERVAL = 60
 DEFAULT_STORAGE_MAX_LENGTH = 100
 
 logger = logging.getLogger(__name__)
+
+
+class HeartbeatSchema(Schema):
+    auth_token = fields.String(required=True)
+    device_id = fields.Integer(required=True)
+    device_uuid = fields.UUID(required=True)
+    interval = fields.Integer(required=False, missing=DEFAULT_HEARTBEAT_INTERVAL)
+    name = fields.String(required=True)
+    url = fields.Url(required=True)
+
+
+class ListenerSchema(Schema):
+    name = fields.String(required=True)
+    settings = fields.Dict(
+        keys=fields.String(required=True), values=fields.String(required=True)
+    )
+    type = fields.String(required=True)
+
+
+class LoggingSchema(Schema):
+    level = fields.String(required=False, missing="DEBUG")
+    name = fields.String(required=True)
+    type = fields.String(required=True)
+
+
+class NotifierSchema(Schema):
+    name = fields.String(required=True)
+    priority = fields.String(required=True)
+    settings = fields.Dict(
+        keys=fields.String(required=True), values=fields.String(required=True)
+    )
+    type = fields.String(required=True)
+
+
+class StorageSchema(Schema):
+    name = fields.String(required=True)
+    settings = fields.Dict(
+        keys=fields.String(required=True), values=fields.String(required=True)
+    )
+    type = fields.String(required=True)
+
+
+class ConfigSchema(Schema):
+    heartbeats = fields.List(fields.Nested(HeartbeatSchema), required=False, missing=[])
+    ip = fields.IPv4(required=True)
+    listeners = fields.List(fields.Nested(ListenerSchema), required=False, missing=[])
+    logging = fields.List(fields.Nested(LoggingSchema), required=False, missing=[])
+    notifiers = fields.List(fields.Nested(NotifierSchema), required=False, missing=[])
+    partitions = fields.Mapping(
+        keys=fields.String(required=True),
+        values=fields.String(required=True),
+        required=True,
+    )
+    password = fields.String(missing="")
+    port = fields.Integer(required=False, missing=4025)
+    storage = fields.List(fields.Nested(StorageSchema), required=False, missing=[])
+    zones = fields.Mapping(
+        keys=fields.String(required=True),
+        values=fields.String(required=True),
+        required=True,
+    )
 
 
 def load_heartbeats(config: list) -> list:
@@ -166,12 +230,12 @@ def load_storage(config: list) -> dict:
     return storages
 
 
-def read(file: str) -> dict:
+def read(file: str) -> ConfigSchema:
     """
     Reads configuration from given file path and returns dictionary of
     configuration objects.
     :param file: Configuration file path
-    :return: Dictionary of configuration objects
+    :return: ConfigSchema object containing parsed configuration
     """
     file = os.path.expanduser(file)
 
@@ -184,4 +248,7 @@ def read(file: str) -> dict:
     except json.JSONDecodeError:
         logger.critical("Invalid configuration file '{file}'!".format(file=file))
 
-    return data
+    config = ConfigSchema()
+    config.load(data)
+
+    return config
