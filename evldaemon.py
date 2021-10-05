@@ -12,7 +12,7 @@ logger = logging.getLogger("evl")
 
 
 class EvlDaemon:
-    def __init__(self, host: str, password: str, port: int, config: dict = None):
+    def __init__(self, host: str, password: str, port: int, config: conf.ConfigSchema):
 
         self.host = host
         self.password = password
@@ -20,30 +20,25 @@ class EvlDaemon:
         self.connection = None
 
         if config is None:
-            config = {}
+            raise ValueError("Invalid config value!")
         self.config = config
 
         self.event_queue = asyncio.Queue()
         self.status = ev.Status()
 
         # Assign zone and partition names as read from configuration file.
-        ev.EventManager.zones = self.config.get("zones", {})
-        ev.EventManager.partitions = self.config.get("partitions", {})
+        ev.EventManager.zones = self.config.zones
+        ev.EventManager.partitions = self.config.partitions
 
         # TODO: Read command name, priority, login name, etc. overrides from config.
 
         self.event_manager = ev.EventManager(self.event_queue, status=self.status)
 
-        self.notifiers = conf.load_notifiers(self.config.get("notifiers", {}))
-        self.event_manager.add_notifiers(self.notifiers)
+        self.event_manager.add_notifiers(self.config.notifiers)
+        self.event_manager.add_storages(self.config.storage)
+        self.heartbeats = self.config.heartbeats
 
-        self.storage = conf.load_storage(self.config.get("storage", {}))
-        self.event_manager.add_storages(self.storage)
-        self.heartbeats = conf.load_heartbeats(self.config.get("heartbeats", {}))
-
-        self.listeners = conf.load_listeners(
-            self.config.get("listeners", []), self.event_manager
-        )
+        self.listeners = conf.load_listeners(self.config.listeners, self.event_manager)
         self.status.listeners = self.listeners
 
     async def start(self):
@@ -81,22 +76,10 @@ def main():
         print("Unable to read configuration file. Exiting.")
         exit(1)
 
-    logging_config = conf.load_logging(config.get("logging", []))
-    logging.config.dictConfig(logging_config)
+    logging.config.dictConfig(config.logging)
 
-    host = config.get("ip")
-    if host is None:
-        print("IP address not found in configuration file!")
-        exit(1)
-
-    password = config.get("password")
-    if password is None:
-        print("Password not found in configuration file!")
-        exit(1)
-
-    port = config.get("port", 4025)
-
-    ed = EvlDaemon(host, password, port, config)
+    host = str(config.ip)
+    ed = EvlDaemon(host, config.password, config.port, config)
     loop = asyncio.get_event_loop()
 
     try:
