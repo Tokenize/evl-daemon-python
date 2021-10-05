@@ -34,12 +34,9 @@ class EvlDaemon:
 
         self.event_manager = ev.EventManager(self.event_queue, status=self.status)
 
-        self.notifiers = conf.load_notifiers(self.config.notifiers)
-        self.event_manager.add_notifiers(self.notifiers)
-
-        self.storage = conf.load_storage(self.config.storage)
-        self.event_manager.add_storages(self.storage)
-        self.heartbeats = conf.load_heartbeats(self.config.heartbeats)
+        self.event_manager.add_notifiers(self.config.notifiers)
+        self.event_manager.add_storages(self.config.storage)
+        self.heartbeats = self.config.heartbeats
 
         self.listeners = conf.load_listeners(self.config.listeners, self.event_manager)
         self.status.listeners = self.listeners
@@ -79,21 +76,10 @@ def main():
         print("Unable to read configuration file. Exiting.")
         exit(1)
 
-    # logging.config.dictConfig(config.)
+    logging.config.dictConfig(config.logging)
 
-    host = config.ip
-    if host is None:
-        print("IP address not found in configuration file!")
-        exit(1)
-
-    password = config.password
-    if password is None:
-        print("Password not found in configuration file!")
-        exit(1)
-
-    port = config.port
-
-    ed = EvlDaemon(host, password, port, config)
+    host = str(config.ip)
+    ed = EvlDaemon(host, config.password, config.port, config)
     loop = asyncio.get_event_loop()
 
     try:

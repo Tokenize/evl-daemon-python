@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, post_load
 
 import evl.command as cmd
 import evl.listeners.asynchttp as http
@@ -16,18 +16,62 @@ import evl.tasks.heartbeat as heartbeat
 
 
 DEFAULT_HEARTBEAT_INTERVAL = 60
+DEFAULT_LOGGING_LEVEL = "DEBUG"
+DEFAULT_NOTIFIER_PRIORITY = "LOW"
 DEFAULT_STORAGE_MAX_LENGTH = 100
 
 logger = logging.getLogger(__name__)
 
 
+class Config:
+    def __init__(self, **kwargs):
+
+        self.heartbeats = load_heartbeats(kwargs.pop("heartbeats", []))
+        self.logging = load_logging(kwargs.pop("logging", []))
+        self.notifiers = load_notifiers(kwargs.pop("notifiers", []))
+        self.storage = load_storage(kwargs.pop("storage", []))
+
+        self.__dict__.update(kwargs)
+
+
+class HeartbeatConfig:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
+class ListenerConfig:
+    def __init__(self, **kwargs):
+        self.kind = kwargs.pop("type")
+        self.__dict__.update(kwargs)
+
+
+class LoggingConfig:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
+class NotifierConfig:
+    def __init__(self, **kwargs):
+        self.priority = kwargs.pop("priority").upper()
+        self.__dict__.update(kwargs)
+
+
+class StorageConfig:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
 class HeartbeatSchema(Schema):
     auth_token = fields.String(required=True)
     device_id = fields.Integer(required=True)
-    device_uuid = fields.UUID(required=True)
+    device_uuid = fields.String(required=True)
     interval = fields.Integer(required=False, missing=DEFAULT_HEARTBEAT_INTERVAL)
     name = fields.String(required=True)
     url = fields.Url(required=True)
+
+    @post_load
+    def make_hearbeat_config(self, data, **kwargs):
+        return HeartbeatConfig(**data)
 
 
 class ListenerSchema(Schema):
@@ -37,20 +81,35 @@ class ListenerSchema(Schema):
     )
     type = fields.String(required=True)
 
+    @post_load
+    def make_listener_config(self, data, **kwargs):
+        return ListenerConfig(**data)
+
 
 class LoggingSchema(Schema):
-    level = fields.String(required=False, missing="DEBUG")
+    level = fields.String(required=False, missing=DEFAULT_LOGGING_LEVEL)
     name = fields.String(required=True)
     type = fields.String(required=True)
+
+    @post_load
+    def make_logging_config(self, data, **kwargs):
+        return LoggingConfig(**data)
 
 
 class NotifierSchema(Schema):
+    layout = fields.String(required=False, missing=None)
     name = fields.String(required=True)
-    priority = fields.String(required=True)
+    priority = fields.String(required=False, missing=DEFAULT_NOTIFIER_PRIORITY)
     settings = fields.Dict(
-        keys=fields.String(required=True), values=fields.String(required=True)
+        keys=fields.String(required=True),
+        values=fields.String(required=True),
+        missing={},
     )
     type = fields.String(required=True)
+
+    @post_load
+    def make_notifier_config(self, data, **kwargs):
+        return NotifierConfig(**data)
 
 
 class StorageSchema(Schema):
@@ -59,6 +118,10 @@ class StorageSchema(Schema):
         keys=fields.String(required=True), values=fields.String(required=True)
     )
     type = fields.String(required=True)
+
+    @post_load
+    def make_storage_config(self, data, **kwargs):
+        return StorageConfig(**data)
 
 
 class ConfigSchema(Schema):
@@ -81,37 +144,42 @@ class ConfigSchema(Schema):
         required=True,
     )
 
+    @post_load
+    def make_config(self, data, **kwargs):
+        return Config(**data)
 
-def load_heartbeats(config: list) -> list:
+
+HeartbeatConfigs = list[HeartbeatConfig]
+ListenerConfigs = list[ListenerConfig]
+LoggingConfigs = list[LoggingConfig]
+NotifierConfigs = list[NotifierConfig]
+StorageConfigs = list[StorageConfig]
+
+
+def load_heartbeats(config: HeartbeatConfigs) -> list[heartbeat.HeartbeatTask]:
     heartbeats = []
     for hb in config:
-        name = hb.get("name")
-        url = hb.get("url")
-        device_uuid = (hb.get("device_uuid"),)
-        device_id = hb.get("device_id")
-        auth_token = hb.get("auth_token", "")
-        interval = hb.get("interval", 60)
-
         new_heartbeat = heartbeat.HeartbeatTask(
-            name, device_id, device_uuid, interval, url, auth_token
+            hb.name, hb.device_id, hb.device_uuid, hb.interval, hb.url, hb.auth_token
         )
         heartbeats.append(new_heartbeat)
 
     return heartbeats
 
 
-def load_listeners(config: list, event_manager) -> list:
+def load_listeners(config: ListenerConfigs, event_manager) -> list:
     listeners = []
     for listener in config:
-        name = listener.get("name")
-        kind = listener["type"]
-
-        if kind == "http":
-            settings = listener.get("settings")
+        if listener.kind == "http":
+            settings = listener.settings
             port = int(settings.get("port", 5204))
             auth_token = settings.get("auth_token", "")
             new_listener = http.AsyncHttpListener(
-                name, port, auth_token, event_manager, "memory"
+                listener.name,
+                port,
+                auth_token,
+                event_manager,
+                "memory",
             )
 
         else:
@@ -123,7 +191,7 @@ def load_listeners(config: list, event_manager) -> list:
     return listeners
 
 
-def load_logging(config: list) -> dict:
+def load_logging(config: LoggingConfigs) -> dict:
     """
     Loads logging configuration from config file and returns a dictionary
     following the logging configuration dictionary schema.
@@ -140,9 +208,9 @@ def load_logging(config: list) -> dict:
 
     handlers = []
     for new_logger in config:
-        priority = new_logger.get("level", "INFO")
-        name = new_logger["name"]
-        kind = new_logger["type"]
+        priority = new_logger.level
+        name = new_logger.name
+        kind = new_logger.type
 
         if kind == "console":
             log_config["handlers"][name] = {
@@ -158,22 +226,22 @@ def load_logging(config: list) -> dict:
     return log_config
 
 
-def load_notifiers(config: list) -> dict:
+def load_notifiers(config: NotifierConfigs) -> dict:
     """
     Load notifiers from given list of notifier configurations
-    :param config: List of notifier configuration dicts
+    :param config: List of notifier configuration objects
     """
     notifiers = {}
     for notifier in config:
-        priority = cmd.Priority[notifier.get("priority", "LOW").upper()]
-        name = notifier.get("name")
-        kind = notifier["type"]
+        name = notifier.name
+        priority = cmd.Priority[notifier.priority]
+        kind = notifier.type
+        layout = notifier.layout
+        settings = notifier.settings
 
         if kind == "console":
             new_notifier = console.ConsoleNotifier(priority=priority, name=name)
         elif kind == "sms":
-            layout = notifier.get("layout")
-            settings = notifier.get("settings")
             sender = settings.get("sender")
             recipient = settings.get("recipient")
             sid = settings.get("sid")
@@ -182,8 +250,6 @@ def load_notifiers(config: list) -> dict:
                 sid, auth_token, sender, recipient, priority, layout, name
             )
         elif kind == "email":
-            layout = notifier.get("layout")
-            settings = notifier.get("settings")
             sender = settings.get("sender")
             recipient = settings.get("recipient")
             api_key = settings.get("apiKey")
@@ -192,8 +258,6 @@ def load_notifiers(config: list) -> dict:
                 api_key, sender, recipient, priority, layout, subject, name
             )
         elif kind == "mimir":
-            layout = notifier.get("layout")
-            settings = notifier.get("settings")
             auth_token = settings.get("auth_token")
             device_uuid = settings.get("device_uuid")
             url = settings.get("url")
@@ -209,18 +273,20 @@ def load_notifiers(config: list) -> dict:
     return notifiers
 
 
-def load_storage(config: list) -> dict:
+def load_storage(config: StorageConfigs) -> dict:
     """
     Load storage engines from given list of storage configurations
     :param config: List of storage engine configuration dicts
     """
     storages = {}
     for storage in config:
-        kind = storage["type"]
+        kind = storage.type
+        name = storage.name
+        settings = storage.settings
+
         # Set up storage engines defined in configuration file
         if kind == "memory":
-            max_size = storage.get("maxSize", DEFAULT_STORAGE_MAX_LENGTH)
-            name = storage.get("name", "memory")
+            max_size = int(settings.get("maxSize", DEFAULT_STORAGE_MAX_LENGTH))
             new_storage = memory.MemoryStorage(size=max_size, name=name)
         else:
             new_storage = None
@@ -248,7 +314,7 @@ def read(file: str) -> ConfigSchema:
     except json.JSONDecodeError:
         logger.critical("Invalid configuration file '{file}'!".format(file=file))
 
-    config = ConfigSchema()
-    config.load(data)
+    config_schema = ConfigSchema()
+    config = config_schema.load(data)
 
     return config
