@@ -1,10 +1,8 @@
-# This project is no longer under active development and has been archived.
-
 # EvlDaemon [![Build Status](https://travis-ci.org/Tokenize/evl-daemon-python.png)](https://travis-ci.org/Tokenize/evl-daemon-python)
 
-**A cross-plaform Python API and daemon for the Envisalink TPI (DSC) module**
+**A cross-platform Python API and daemon for the Envisalink TPI (DSC) module**
 
-**Requirements:** Python >= 3.7 and [poetry](https://python-poetry.org).
+**Requirements:** Python >= 3.11 and [poetry](https://python-poetry.org).
 
 **Note:** This version is a work in progress and may not be entirely stable and bug-free.
 But it shouldn't melt your system, so there's that.
@@ -23,12 +21,3 @@ But it shouldn't melt your system, so there's that.
 ## Configuration
 
 See [config.json](config.json) for configuration for details.
-
-## Coming up...
-
-Some things planned for the future:
-
-- SMS notifier via Twilio
-- Email notifier via SendGrid
-- Generic REST API notifier
-- _And more!_
