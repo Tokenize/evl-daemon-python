@@ -8,7 +8,7 @@ class Command:
         try:
             self.command_type = CommandType(number)
         except ValueError:
-            self.command_type = None
+            self.command_type = CommandType.UNKNOWN
 
     def __str__(self) -> str:
         return self.describe()
@@ -98,6 +98,7 @@ class CommandType(Enum):
     MASTER_CODE_REQUIRED = "921"
     INSTALLERS_CODE_REQUIRED = "922"
     SOFTWARE_ZONE_ALARM = "S01"
+    UNKNOWN = "UNK"
 
 
 class Priority(Enum):
@@ -184,6 +185,7 @@ NAMES = {
     CommandType.MASTER_CODE_REQUIRED: "Master Code Required",
     CommandType.INSTALLERS_CODE_REQUIRED: "Installers Code Required",
     CommandType.SOFTWARE_ZONE_ALARM: "Software Zone Alarm",
+    CommandType.UNKNOWN: "Unknown"
 }
 
 # Priorities are Priority.LOW by default. Only commands that are higher priority
