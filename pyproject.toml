@@ -13,7 +13,7 @@ sendgrid = "^6.0"
 marshmallow = "^3.13"
 
 [tool.poetry.dev-dependencies]
-black = "^23.0"
+black = "^24.0"
 flake8 = "*"
 pytest = "^7.4.3"
 
