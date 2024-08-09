@@ -7,7 +7,7 @@ license = "GPL-3.0-only"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-aiohttp = "^3.6"
+aiohttp = "^3.10"
 twilio = "^8.0"
 sendgrid = "^6.0"
 marshmallow = "^3.13"
