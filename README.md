@@ -1,11 +1,8 @@
 # EvlDaemon [![Build Status](https://travis-ci.org/Tokenize/evl-daemon-python.png)](https://travis-ci.org/Tokenize/evl-daemon-python)
 
-**A cross-platform Python API and daemon for the Envisalink TPI (DSC) module**
+A cross-platform Python API and daemon for the **Envisalink TPI (DSC)** module.
 
 **Requirements:** Python >= 3.11 and [poetry](https://python-poetry.org).
-
-**Note:** This version is a work in progress and may not be entirely stable and bug-free.
-But it shouldn't melt your system, so there's that.
 
 ## Installation
 
@@ -21,3 +18,15 @@ But it shouldn't melt your system, so there's that.
 ## Configuration
 
 See [config.json](config.json) for configuration for details.
+
+## Development
+
+### Running tests
+
+To run all unit tests, run the following:
+
+```bash
+poetry run python -m unittest discover test
+```
+
+
