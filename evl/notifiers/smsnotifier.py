@@ -1,5 +1,4 @@
 import logging
-from time import localtime, strftime
 
 from twilio.base.exceptions import TwilioException
 from twilio.rest import Client

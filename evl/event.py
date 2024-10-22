@@ -182,7 +182,7 @@ class Status:
             "armed_state": self.armed_state,
             "connection": self.connection,
             "last_event": last_event,
-            "listeners": [str(l) for l in self.listeners],
+            "listeners": [str(listener) for listener in self.listeners],
             "notifiers": [str(n) for _, n in self.notifiers.items()],
             "partitions": util.describe_dict(EventManager.partitions),
             "storage": [str(s) for _, s in self.storage.items()],
