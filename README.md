@@ -1,5 +1,8 @@
 # EvlDaemon
 
+![Build and Test](https://github.com/tokenize/evl-daemon-python/actions/workflows/build-and-test.yml/badge.svg)
+![CodeQL](https://github.com/tokenize/evl-daemon-python/actions/workflows/codeql-analysis.yml/badge.svg)
+
 A cross-platform Python API and daemon for the **Envisalink TPI (DSC)** module.
 
 **Requirements:** Python >= 3.11 and [poetry](https://python-poetry.org).
