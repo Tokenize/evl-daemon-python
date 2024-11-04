@@ -12,6 +12,7 @@ aiohttp = "^3.10"
 twilio = "^9.3"
 sendgrid = "^6.0"
 marshmallow = "^3.23"
+pydantic-settings = "^2.6.0"
 
 [tool.poetry.dev-dependencies]
 black = "^24.0"
