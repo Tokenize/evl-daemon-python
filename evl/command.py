@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum, auto
 
 
 class Command:
@@ -101,11 +101,11 @@ class CommandType(Enum):
     UNKNOWN = "UNK"
 
 
-class Priority(Enum):
-    LOW = 0
-    MEDIUM = 1
-    HIGH = 2
-    CRITICAL = 3
+class Priority(StrEnum):
+    LOW = auto()
+    MEDIUM = auto()
+    HIGH = auto()
+    CRITICAL = auto()
 
     def __str__(self):
         return self.name.title()
@@ -185,7 +185,7 @@ NAMES = {
     CommandType.MASTER_CODE_REQUIRED: "Master Code Required",
     CommandType.INSTALLERS_CODE_REQUIRED: "Installers Code Required",
     CommandType.SOFTWARE_ZONE_ALARM: "Software Zone Alarm",
-    CommandType.UNKNOWN: "Unknown"
+    CommandType.UNKNOWN: "Unknown",
 }
 
 # Priorities are Priority.LOW by default. Only commands that are higher priority
