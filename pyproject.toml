@@ -11,7 +11,7 @@ python = "^3.11"
 aiohttp = "^3.10"
 twilio = "^9.3"
 sendgrid = "^6.0"
-marshmallow = "^3.23"
+marshmallow = "^3.26"
 
 [tool.poetry.dev-dependencies]
 black = "^24.0"
