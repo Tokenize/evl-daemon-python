@@ -13,4 +13,4 @@ version = "0.1.0"
 description = "A cross-platform API and daemon for the Envisalink TPI (DSC) module."
 
 [dependency-groups]
-dev = ["black<25.0,>=24.0", "flake8"]
+dev = ["black>=24.0,<26.0", "flake8"]
