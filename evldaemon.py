@@ -80,7 +80,9 @@ def main():
 
     host = str(config.ip)
     ed = EvlDaemon(host, config.password, config.port, config)
-    loop = asyncio.get_event_loop()
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
     try:
         loop.run_until_complete(ed.start())

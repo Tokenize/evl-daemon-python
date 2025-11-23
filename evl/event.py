@@ -137,7 +137,7 @@ class Status:
         self.partitions = {}
         self.zones = {}
 
-        self.last_event = None
+        self.last_event: Event = None
 
         self.connection = {"hostname": "", "port": 0}
 
@@ -262,7 +262,7 @@ class EventManager:
         return self.status.report()
 
     async def wait(self) -> None:
-        """Initiate wait for incoming events in event queue."""
+        """Initiate wait for incoming events in the event queue."""
         while True:
             (command, data) = await self._event_queue.get()
             parsed_data = dt.parse(command, data)
