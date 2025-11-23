@@ -6,7 +6,7 @@ dependencies = [
     "aiohttp<4.0,>=3.10",
     "twilio<10.0,>=9.3",
     "sendgrid<7.0,>=6.0",
-    "marshmallow<4.0,>=3.23",
+    "marshmallow>=3.23,<5.0",
 ]
 name = "evl-daemon-python"
 version = "0.1.0"
