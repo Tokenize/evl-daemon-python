@@ -5,7 +5,7 @@ requires-python = "<4.0,>=3.11"
 dependencies = [
     "aiohttp<4.0,>=3.10",
     "twilio<10.0,>=9.3",
-    "sendgrid<7.0,>=6.0",
+    "sendgrid>=6.12.5,<7.0",
     "marshmallow>=3.23,<5.0",
 ]
 name = "evl-daemon-python"
