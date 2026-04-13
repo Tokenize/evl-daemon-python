@@ -3,7 +3,7 @@ authors = [{ name = "Mike Farr", email = "mike@tokenize.ca" }]
 license = { text = "GPL-3.0-only" }
 requires-python = "<4.0,>=3.11"
 dependencies = [
-    "aiohttp<4.0,>=3.10",
+    "aiohttp>=3.13.5,<4.0",
     "twilio<10.0,>=9.3",
     "sendgrid<7.0,>=6.0",
     "marshmallow>=3.23,<5.0",
